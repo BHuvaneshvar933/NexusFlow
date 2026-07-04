@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      String     @default("user") // "user" or "admin"
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  workflows Workflow[]
+}
+
+model Workflow {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  triggerType String      // e.g., "RESUME_UPLOAD", "WEBHOOK", "CRON"
+  isActive    Boolean     @default(false)
+  
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  actions     Action[]
+  executions  Execution[]
+}
+
+model Action {
+  id         String   @id @default(uuid())
+  actionType String   // e.g., "SEND_EMAIL", "AI_ANALYZE", "SAVE_TO_DB"
+  sequence   Int      // Order of execution (1, 2, 3...)
+  config     Json     // Action-specific settings
+  
+  workflowId String
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Execution {
+  id          String    @id @default(uuid())
+  status      String    @default("pending") // pending, running, success, failed
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  logs        Json?     // Array of execution steps
+  error       String?
+  
+  workflowId  String
+  workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+}

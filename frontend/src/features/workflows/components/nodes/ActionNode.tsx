@@ -1,0 +1,57 @@
+import { Handle, Position } from '@xyflow/react';
+import { Mail, BrainCircuit, Database, Globe, Code2, Filter, Plus } from 'lucide-react';
+
+const ACTION_UI: Record<string, any> = {
+  SEND_EMAIL: { icon: <Mail className="w-5 h-5 text-blue-400" />, title: 'Send Email', bg: 'border-blue-500/20 bg-blue-500/5' },
+  AI_ANALYZE: { icon: <BrainCircuit className="w-5 h-5 text-purple-400" />, title: 'AI Analysis', bg: 'border-purple-500/20 bg-purple-500/5' },
+  SAVE_TO_DB: { icon: <Database className="w-5 h-5 text-green-400" />, title: 'Save to DB', bg: 'border-green-500/20 bg-green-500/5' },
+  HTTP_REQUEST: { icon: <Globe className="w-5 h-5 text-orange-400" />, title: 'HTTP Request', bg: 'border-orange-500/20 bg-orange-500/5' },
+  CUSTOM_CODE: { icon: <Code2 className="w-5 h-5 text-pink-400" />, title: 'Custom Code', bg: 'border-pink-500/20 bg-pink-500/5' },
+  CONDITION: { icon: <Filter className="w-5 h-5 text-yellow-400" />, title: 'Condition', bg: 'border-yellow-500/20 bg-yellow-500/5' },
+};
+
+export default function ActionNode({ data }: { data: any }) {
+  const ui = ACTION_UI[data.action.actionType] || { icon: <Code2 className="w-5 h-5 text-white/50" />, title: 'Unknown', bg: 'border-white/10' };
+
+  return (
+    <div className="relative group">
+      <Handle 
+        type="target" 
+        position={Position.Top} 
+        className="w-3 h-3 bg-blue-500 border-2 border-black" 
+      />
+      
+      <div 
+        className={`glass-panel w-64 rounded-xl border shadow-2xl overflow-hidden cursor-pointer hover:border-white/40 transition-colors ${ui.bg}`}
+        onClick={data.onClick}
+      >
+        <div className="p-3 flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-black/40">
+            {ui.icon}
+          </div>
+          <div>
+            <h3 className="font-bold text-white text-sm">{ui.title}</h3>
+            <p className="text-[10px] font-mono text-white/40 uppercase">Step {data.action.sequence}</p>
+          </div>
+        </div>
+      </div>
+
+      <Handle 
+        type="source" 
+        position={Position.Bottom} 
+        className="w-3 h-3 bg-blue-500 border-2 border-black" 
+      />
+
+      {data.isLast && (
+        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <button 
+            onClick={(e) => { e.stopPropagation(); data.onAddNext(); }}
+            className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center text-white shadow-lg transition-transform hover:scale-110 z-10 relative"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

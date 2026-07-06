@@ -12,6 +12,11 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
+  const activeWorkspaceId = useAuthStore.getState().activeWorkspaceId;
+  if (activeWorkspaceId) {
+    headers.set('x-workspace-id', activeWorkspaceId);
+  }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,

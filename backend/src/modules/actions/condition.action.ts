@@ -11,21 +11,21 @@ export interface ConditionActionPayload {
   };
 }
 
-export class ConditionAction implements Action<ConditionActionPayload> {
+export class ConditionAction implements Action<any> {
   type = 'CONDITION';
 
-  async execute(payload: ConditionActionPayload): Promise<ActionResult> {
-    const { config, context } = payload;
+  async execute(payload: any): Promise<ActionResult> {
+    const { condition, trigger, steps } = payload;
     
-    if (!config.condition) {
+    if (!condition) {
       return { success: false, error: 'Condition expression is missing' };
     }
 
     try {
       // Create a secure sandbox environment
       const sandbox = {
-        variables: context.variables,
-        env: context.env,
+        trigger,
+        steps,
         console: {
           log: (...args: any[]) => console.log('[Condition]', ...args),
           error: (...args: any[]) => console.error('[Condition]', ...args),
@@ -36,7 +36,7 @@ export class ConditionAction implements Action<ConditionActionPayload> {
       vm.createContext(sandbox);
 
       // Execute the condition and assign it to the 'result' variable in the sandbox
-      const script = new vm.Script(`result = !!(${config.condition});`);
+      const script = new vm.Script(`result = !!(${condition});`);
       script.runInContext(sandbox, { timeout: 1000 }); // 1 second timeout
 
       const isMet = sandbox.result;
@@ -45,13 +45,13 @@ export class ConditionAction implements Action<ConditionActionPayload> {
         return { 
           success: true, 
           halt: false,
-          data: { met: true, expression: config.condition }
+          data: { met: true, expression: condition }
         };
       } else {
         return { 
           success: true, 
           halt: true, 
-          data: { met: false, expression: config.condition }
+          data: { met: false, expression: condition }
         };
       }
     } catch (error: any) {

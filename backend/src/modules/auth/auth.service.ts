@@ -22,12 +22,22 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
+    // Create user and default workspace
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
+        workspaceMembers: {
+          create: {
+            role: 'owner',
+            workspace: {
+              create: {
+                name: `${name}'s Workspace`,
+              }
+            }
+          }
+        }
       },
     });
 

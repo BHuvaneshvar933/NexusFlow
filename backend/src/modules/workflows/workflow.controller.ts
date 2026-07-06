@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response } from 'express'; // triggering nodemon restart
 import { prisma } from '../../config/database';
 import { sendSuccess, sendError } from '../../utils/response';
 import { cronQueue } from '../../queues/cron.queue';
@@ -29,15 +29,15 @@ const updateCronJob = async (workflowId: string, isActive: boolean, cronExpressi
 
 export const getWorkflows = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return sendError(res, 'Unauthorized', 401);
+    const workspaceId = (req as any).workspaceId;
+    if (!workspaceId) {
+      return sendError(res, 'Workspace ID required', 400);
     }
     
     const workflows = await prisma.workflow.findMany({
-      where: { userId },
+      where: { workspaceId },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        workspace: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -50,11 +50,13 @@ export const getWorkflows = async (req: Request, res: Response) => {
 export const getWorkflowById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const workflow = await prisma.workflow.findUnique({
-      where: { id: id as string },
+    const workspaceId = (req as any).workspaceId;
+
+    const workflow = await prisma.workflow.findFirst({
+      where: { id: id as string, workspaceId },
       include: {
         actions: { orderBy: { sequence: 'asc' } },
-        user: { select: { id: true, name: true, email: true } },
+        workspace: { select: { id: true, name: true } },
       },
     });
     
@@ -72,11 +74,10 @@ export const createWorkflow = async (req: Request, res: Response) => {
   try {
     const { name, description, triggerType, cronExpression, actions, isActive } = req.body;
     
-    // We now have req.user from the protect middleware
-    const userId = req.user?.id;
+    const workspaceId = (req as any).workspaceId;
     
-    if (!userId) {
-      return sendError(res, 'User ID not found in request', 400);
+    if (!workspaceId) {
+      return sendError(res, 'Workspace ID not found in request', 400);
     }
 
     const workflow = await prisma.workflow.create({
@@ -86,7 +87,7 @@ export const createWorkflow = async (req: Request, res: Response) => {
         triggerType,
         cronExpression,
         isActive: isActive || false,
-        userId,
+        workspaceId,
         // Nested create for actions
         actions: {
           create: actions?.map((action: any, index: number) => ({
@@ -114,8 +115,13 @@ export const createWorkflow = async (req: Request, res: Response) => {
 export const updateWorkflow = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const workspaceId = (req as any).workspaceId;
     const { name, description, triggerType, cronExpression, isActive, actions } = req.body;
     
+    // Ensure workflow belongs to workspace
+    const existing = await prisma.workflow.findFirst({ where: { id: id as string, workspaceId } });
+    if (!existing) return sendError(res, 'Workflow not found', 404);
+
     const workflow = await prisma.workflow.update({
       where: { id: id as string },
       data: {
@@ -156,6 +162,11 @@ export const updateWorkflow = async (req: Request, res: Response) => {
 export const deleteWorkflow = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const workspaceId = (req as any).workspaceId;
+
+    const existing = await prisma.workflow.findFirst({ where: { id: id as string, workspaceId } });
+    if (!existing) return sendError(res, 'Workflow not found', 404);
+
     await prisma.workflow.delete({
       where: { id: id as string },
     });
@@ -175,11 +186,13 @@ export const triggerWorkflow = async (req: Request, res: Response) => {
     const { id } = req.params;
     const triggerData = req.body;
 
-    const workflow = await prisma.workflow.findUnique({
-      where: { id: id as string },
+    const workspaceId = (req as any).workspaceId;
+
+    const workflow = await prisma.workflow.findFirst({
+      where: { id: id as string, workspaceId },
     });
 
-    if (!workflow || workflow.userId !== req.user?.id) {
+    if (!workflow) {
       return sendError(res, 'Workflow not found or unauthorized', 404);
     }
 

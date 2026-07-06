@@ -1,17 +1,18 @@
-import { Request, Response } from 'express';
+import { Request, Response } from 'express'; // Restart nodemon
 import { prisma } from '../../config/database';
 import { sendSuccess, sendError } from '../../utils/response';
 
 export const getExecutionsByWorkflow = async (req: Request, res: Response) => {
   try {
     const { workflowId } = req.params;
+    const workspaceId = (req as any).workspaceId;
     
-    // Check if the workflow belongs to the user
-    const workflow = await prisma.workflow.findUnique({
-      where: { id: workflowId as string },
+    // Check if the workflow belongs to the workspace
+    const workflow = await prisma.workflow.findFirst({
+      where: { id: workflowId as string, workspaceId },
     });
 
-    if (!workflow || workflow.userId !== req.user?.id) {
+    if (!workflow) {
       return sendError(res, 'Workflow not found or unauthorized', 404);
     }
 
@@ -30,6 +31,7 @@ export const getExecutionsByWorkflow = async (req: Request, res: Response) => {
 export const getExecutionById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const workspaceId = (req as any).workspaceId;
 
     const execution = await prisma.execution.findUnique({
       where: { id: id as string },
@@ -38,7 +40,7 @@ export const getExecutionById = async (req: Request, res: Response) => {
       },
     });
 
-    if (!execution || execution.workflow.userId !== req.user?.id) {
+    if (!execution || execution.workflow.workspaceId !== workspaceId) {
       return sendError(res, 'Execution not found or unauthorized', 404);
     }
 

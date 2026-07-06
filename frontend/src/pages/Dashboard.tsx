@@ -3,15 +3,18 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getWorkflowsApi, triggerWorkflowApi, deleteWorkflowApi } from '../services/workflow';
 import { Activity, Loader2, Play, Pencil, Trash2, History } from 'lucide-react';
 import { useState } from 'react';
+import { useAuthStore } from '../store/authStore';
 import LiveLogsPanel from '../features/executions/LiveLogsPanel';
 import ExecutionHistoryModal from '../features/executions/ExecutionHistoryModal';
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { activeWorkspaceId } = useAuthStore();
   const { data, isLoading, error } = useQuery({
-    queryKey: ['workflows'],
-    queryFn: getWorkflowsApi
+    queryKey: ['workflows', activeWorkspaceId],
+    queryFn: getWorkflowsApi,
+    enabled: !!activeWorkspaceId
   });
   
   const [triggeringId, setTriggeringId] = useState<string | null>(null);

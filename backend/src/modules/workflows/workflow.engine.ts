@@ -1,6 +1,7 @@
 import { prisma } from '../../config/database';
 import { ActionFactory } from '../actions/action.factory';
 import { io } from '../../config/socket';
+import { interpolateConfig } from '../../utils/interpolate';
 
 export class WorkflowEngine {
   async execute(workflowId: string, triggerData: any) {
@@ -32,7 +33,10 @@ export class WorkflowEngine {
     io.to(execution.id).emit('execution:started', { executionId: execution.id });
 
     // 3. Execute actions sequentially
-    let context = { ...triggerData };
+    let context: any = { 
+      trigger: { ...triggerData },
+      steps: {}
+    };
     const logs: any[] = [];
 
     for (const action of workflow.actions) {
@@ -49,19 +53,23 @@ export class WorkflowEngine {
         const handler = ActionFactory.create(action.actionType);
         
         // Ensure config is treated as an object
-        const config = typeof action.config === 'object' ? action.config : {};
+        const config = (action.config && typeof action.config === 'object' && !Array.isArray(action.config) 
+          ? action.config 
+          : {}) as Record<string, any>;
         
+        const interpolatedConfig = interpolateConfig(config, context);
+
         const result = await handler.execute({
           ...context,
-          ...(config as any)
+          ...interpolatedConfig
         });
         
         if (!result.success) {
           throw new Error(result.error || 'Action failed without specific error');
         }
         
-        // Pass result to next action
-        context = { ...context, ...result.data };
+        // Store result in steps namespace
+        context.steps[`${action.sequence}`] = result.data || {};
         
         const successLog = { 
           step: action.actionType, 

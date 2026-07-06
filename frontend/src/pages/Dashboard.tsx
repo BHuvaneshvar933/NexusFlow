@@ -1,30 +1,50 @@
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getWorkflowsApi, triggerWorkflowApi } from '../services/workflow';
-import { Activity, Loader2, Play } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getWorkflowsApi, triggerWorkflowApi, deleteWorkflowApi } from '../services/workflow';
+import { Activity, Loader2, Play, Pencil, Trash2, History } from 'lucide-react';
 import { useState } from 'react';
 import LiveLogsPanel from '../features/executions/LiveLogsPanel';
+import ExecutionHistoryModal from '../features/executions/ExecutionHistoryModal';
 
 export default function Dashboard() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { data, isLoading, error } = useQuery({
     queryKey: ['workflows'],
     queryFn: getWorkflowsApi
   });
   
   const [triggeringId, setTriggeringId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activeLogsWorkflowId, setActiveLogsWorkflowId] = useState<string | null>(null);
+  const [historyWorkflowId, setHistoryWorkflowId] = useState<string | null>(null);
 
   const handleTrigger = async (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     setTriggeringId(id);
-    setActiveLogsWorkflowId(null); // Reset logs panel if opening a new one
+    setActiveLogsWorkflowId(null); 
     try {
       await triggerWorkflowApi(id, { test: true });
-      setActiveLogsWorkflowId(id); // Open logs panel
+      setActiveLogsWorkflowId(id); 
     } catch (err: any) {
       alert("Failed to trigger: " + err.message);
     } finally {
       setTriggeringId(null);
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    if (!confirm("Are you sure you want to delete this workflow?")) return;
+    
+    setDeletingId(id);
+    try {
+      await deleteWorkflowApi(id);
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+    } catch (err: any) {
+      alert("Failed to delete: " + err.message);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -48,19 +68,45 @@ export default function Dashboard() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {workflows.map((workflow: any) => (
-            <div key={workflow.id} className="glass-panel p-6 flex flex-col gap-4 group hover:border-primary/50 transition-colors cursor-pointer">
+            <div key={workflow.id} className="glass-panel p-6 flex flex-col gap-4 group hover:border-primary/50 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-lg bg-primary/20 text-primary flex items-center justify-center">
                   <Activity className="w-6 h-6" />
                 </div>
-                <div className={`px-2 py-1 text-xs font-medium rounded-full ${workflow.isActive ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/50'}`}>
-                  {workflow.isActive ? 'Active' : 'Draft'}
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setHistoryWorkflowId(workflow.id)}
+                    className="p-1.5 hover:bg-white/10 rounded-md text-white/40 hover:text-white transition-colors"
+                    title="Execution History"
+                  >
+                    <History className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => navigate(`/workflows/${workflow.id}/edit`)}
+                    className="p-1.5 hover:bg-white/10 rounded-md text-white/40 hover:text-white transition-colors"
+                    title="Edit Workflow"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={(e) => handleDelete(e, workflow.id)}
+                    disabled={deletingId === workflow.id}
+                    className="p-1.5 hover:bg-red-500/20 rounded-md text-white/40 hover:text-red-400 transition-colors"
+                    title="Delete Workflow"
+                  >
+                    {deletingId === workflow.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
               
               <div className="flex-1">
-                <h3 className="text-xl font-semibold text-white">{workflow.name}</h3>
-                <p className="text-sm text-white/60 mt-1 line-clamp-2">{workflow.description || 'No description provided.'}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-xl font-semibold text-white">{workflow.name}</h3>
+                  <div className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${workflow.isActive ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/50'}`}>
+                    {workflow.isActive ? 'ACTIVE' : 'DRAFT'}
+                  </div>
+                </div>
+                <p className="text-sm text-white/60 line-clamp-2">{workflow.description || 'No description provided.'}</p>
               </div>
 
               {workflow.isActive && (
@@ -91,6 +137,13 @@ export default function Dashboard() {
         <LiveLogsPanel 
           workflowId={activeLogsWorkflowId} 
           onClose={() => setActiveLogsWorkflowId(null)} 
+        />
+      )}
+
+      {historyWorkflowId && (
+        <ExecutionHistoryModal 
+          workflowId={historyWorkflowId}
+          onClose={() => setHistoryWorkflowId(null)}
         />
       )}
     </div>

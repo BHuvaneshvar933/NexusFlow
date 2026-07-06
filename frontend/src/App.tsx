@@ -26,6 +26,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="workflows/new" element={<WorkflowBuilder />} />
+          <Route path="workflows/:id/edit" element={<WorkflowBuilder />} />
         </Route>
       </Route>
       

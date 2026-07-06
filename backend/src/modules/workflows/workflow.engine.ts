@@ -40,6 +40,7 @@ export class WorkflowEngine {
       const logEntry = { step: action.actionType, status: 'STARTED', timestamp: stepStart };
       logs.push(logEntry);
       io.to(execution.id).emit('execution:log', { executionId: execution.id, log: logEntry });
+      io.to(`workflow-${workflowId}`).emit('execution:log', { executionId: execution.id, log: logEntry });
       
       try {
         console.log(`[WorkflowEngine] Executing action: ${action.actionType}`);
@@ -64,12 +65,19 @@ export class WorkflowEngine {
         
         const successLog = { 
           step: action.actionType, 
-          status: 'SUCCESS', 
+          status: result.halt ? 'FILTERED' : 'SUCCESS', 
           timestamp: new Date(),
-          durationMs: new Date().getTime() - stepStart.getTime()
+          durationMs: new Date().getTime() - stepStart.getTime(),
+          data: result.data
         };
         logs.push(successLog);
         io.to(execution.id).emit('execution:log', { executionId: execution.id, log: successLog });
+        io.to(`workflow-${workflowId}`).emit('execution:log', { executionId: execution.id, log: successLog });
+        
+        if (result.halt) {
+          console.log(`[WorkflowEngine] Workflow halted by filter condition.`);
+          break; // Stop executing further actions, but mark execution as successful
+        }
         
       } catch (error: any) {
         console.error(`[WorkflowEngine] Action failed: ${action.actionType}`, error);
@@ -82,6 +90,7 @@ export class WorkflowEngine {
         };
         logs.push(errorLog);
         io.to(execution.id).emit('execution:log', { executionId: execution.id, log: errorLog });
+        io.to(`workflow-${workflowId}`).emit('execution:log', { executionId: execution.id, log: errorLog });
 
         // 4a. Mark execution failed
         await prisma.execution.update({

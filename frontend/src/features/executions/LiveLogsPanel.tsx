@@ -8,6 +8,7 @@ interface LogEntry {
   timestamp: string;
   durationMs?: number;
   error?: string;
+  data?: any;
 }
 
 export default function LiveLogsPanel({ workflowId, onClose }: { workflowId: string, onClose: () => void }) {
@@ -100,6 +101,13 @@ export default function LiveLogsPanel({ workflowId, onClose }: { workflowId: str
             </div>
             {log.error && (
               <div className="pl-24 text-red-400">Error: {log.error}</div>
+            )}
+            {log.data && (
+              <div className="pl-24 pr-4 mt-1">
+                <div className="bg-black/40 border border-white/5 rounded-md p-2 overflow-x-auto text-white/70 whitespace-pre-wrap font-mono text-[11px]">
+                  {JSON.stringify(log.data, null, 2)}
+                </div>
+              </div>
             )}
           </div>
         ))}

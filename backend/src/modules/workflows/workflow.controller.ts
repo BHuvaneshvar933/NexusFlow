@@ -1,6 +1,31 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../config/database';
 import { sendSuccess, sendError } from '../../utils/response';
+import { cronQueue } from '../../queues/cron.queue';
+
+const updateCronJob = async (workflowId: string, isActive: boolean, cronExpression: string | null) => {
+  try {
+    const repeatableJobs = await cronQueue.getRepeatableJobs();
+    for (const job of repeatableJobs) {
+      if (job.id === workflowId) {
+        await cronQueue.removeRepeatableByKey(job.key);
+      }
+    }
+    
+    if (isActive && cronExpression) {
+      await cronQueue.add(
+        'cron-trigger',
+        { workflowId },
+        { 
+          repeat: { pattern: cronExpression },
+          jobId: workflowId
+        }
+      );
+    }
+  } catch (err) {
+    console.error('Error updating cron job for workflow', workflowId, err);
+  }
+};
 
 export const getWorkflows = async (req: Request, res: Response) => {
   try {
@@ -45,7 +70,7 @@ export const getWorkflowById = async (req: Request, res: Response) => {
 
 export const createWorkflow = async (req: Request, res: Response) => {
   try {
-    const { name, description, triggerType, actions, isActive } = req.body;
+    const { name, description, triggerType, cronExpression, actions, isActive } = req.body;
     
     // We now have req.user from the protect middleware
     const userId = req.user?.id;
@@ -59,6 +84,7 @@ export const createWorkflow = async (req: Request, res: Response) => {
         name,
         description,
         triggerType,
+        cronExpression,
         isActive: isActive || false,
         userId,
         // Nested create for actions
@@ -75,6 +101,10 @@ export const createWorkflow = async (req: Request, res: Response) => {
       }
     });
     
+    if (workflow.triggerType === 'CRON') {
+      await updateCronJob(workflow.id, workflow.isActive, workflow.cronExpression);
+    }
+    
     return sendSuccess(res, workflow, 'Workflow created successfully', 201);
   } catch (error) {
     return sendError(res, 'Failed to create workflow', 500, error);
@@ -84,7 +114,7 @@ export const createWorkflow = async (req: Request, res: Response) => {
 export const updateWorkflow = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, description, triggerType, isActive } = req.body;
+    const { name, description, triggerType, cronExpression, isActive, actions } = req.body;
     
     const workflow = await prisma.workflow.update({
       where: { id: id as string },
@@ -92,9 +122,30 @@ export const updateWorkflow = async (req: Request, res: Response) => {
         name,
         description,
         triggerType,
+        cronExpression,
         isActive,
+        ...(actions && {
+          actions: {
+            deleteMany: {},
+            create: actions.map((action: any, index: number) => ({
+              actionType: action.actionType,
+              config: action.config || {},
+              sequence: index,
+            })),
+          },
+        }),
+      },
+      include: {
+        actions: true,
       },
     });
+    
+    if (workflow.triggerType === 'CRON' || triggerType === 'CRON') {
+      await updateCronJob(workflow.id, workflow.isActive && workflow.triggerType === 'CRON', workflow.cronExpression);
+    } else {
+      // If it was changed away from CRON, remove any existing jobs
+      await updateCronJob(workflow.id, false, null);
+    }
     
     return sendSuccess(res, workflow, 'Workflow updated successfully');
   } catch (error) {
@@ -108,6 +159,9 @@ export const deleteWorkflow = async (req: Request, res: Response) => {
     await prisma.workflow.delete({
       where: { id: id as string },
     });
+    
+    await updateCronJob(id as string, false, null);
+    
     return sendSuccess(res, null, 'Workflow deleted successfully');
   } catch (error) {
     return sendError(res, 'Failed to delete workflow', 500, error);

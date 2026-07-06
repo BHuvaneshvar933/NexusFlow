@@ -24,11 +24,14 @@ app.use(express.json());
 
 import authRoutes from './modules/auth/auth.routes';
 import executionRoutes from './modules/executions/execution.routes';
-import './workers/workflow.worker'; // Initialize the worker
+import webhookRoutes from './modules/webhooks/webhook.routes';
+import './workers/workflow.worker'; // Initialize the main worker
+import './workers/cron.worker'; // Initialize the cron worker
 
 app.use('/api/auth', authRoutes);
 app.use('/api/workflows', workflowRoutes);
 app.use('/api/executions', executionRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {

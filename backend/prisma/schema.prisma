@@ -25,7 +25,8 @@ model Workflow {
   id          String      @id @default(uuid())
   name        String
   description String?
-  triggerType String      // e.g., "RESUME_UPLOAD", "WEBHOOK", "CRON"
+  triggerType String      // e.g., "MANUAL", "WEBHOOK", "CRON"
+  cronExpression String?  // e.g., "0 * * * *"
   isActive    Boolean     @default(false)
   
   userId      String

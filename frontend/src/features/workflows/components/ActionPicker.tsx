@@ -1,7 +1,14 @@
-import { Mail, BrainCircuit, Database, X } from 'lucide-react';
+import { Mail, BrainCircuit, Database, X, Globe, Code2, Filter } from 'lucide-react';
 import { useWorkflowStore } from '../../../store/workflowStore';
 
 const AVAILABLE_ACTIONS = [
+  {
+    type: 'CONDITION',
+    title: 'Condition / Filter',
+    description: 'Halt execution if a condition is not met',
+    icon: <Filter className="w-5 h-5 text-yellow-400" />,
+    bg: 'bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/20'
+  },
   {
     type: 'SEND_EMAIL',
     title: 'Send Email',
@@ -22,6 +29,20 @@ const AVAILABLE_ACTIONS = [
     description: 'Insert or update a record in Postgres',
     icon: <Database className="w-5 h-5 text-green-400" />,
     bg: 'bg-green-500/10 hover:bg-green-500/20 border-green-500/20'
+  },
+  {
+    type: 'HTTP_REQUEST',
+    title: 'HTTP Request',
+    description: 'Make a custom API call (Webhooks)',
+    icon: <Globe className="w-5 h-5 text-orange-400" />,
+    bg: 'bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/20'
+  },
+  {
+    type: 'CUSTOM_CODE',
+    title: 'Custom Code',
+    description: 'Write custom JavaScript logic',
+    icon: <Code2 className="w-5 h-5 text-pink-400" />,
+    bg: 'bg-pink-500/10 hover:bg-pink-500/20 border-pink-500/20'
   }
 ];
 

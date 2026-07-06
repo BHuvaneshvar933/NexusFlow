@@ -79,7 +79,7 @@ export default function ActionConfigSidebar({
           {action.actionType === 'AI_ANALYZE' && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-white/80">Prompt</label>
-              <p className="text-xs text-white/40 mb-2">You can use {{variables}} from previous steps.</p>
+              <p className="text-xs text-white/40 mb-2">You can use {"{{variables}}"} from previous steps.</p>
               <textarea 
                 value={action.config.prompt || ''}
                 onChange={(e) => handleChange('prompt', e.target.value)}
@@ -113,6 +113,70 @@ export default function ActionConfigSidebar({
             </>
           )}
 
+          {action.actionType === 'HTTP_REQUEST' && (
+            <>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white/80">URL</label>
+                <input 
+                  type="url" 
+                  value={action.config.url || ''}
+                  onChange={(e) => handleChange('url', e.target.value)}
+                  placeholder="https://api.example.com/data"
+                  className="input-field font-mono text-sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white/80">Method</label>
+                <select 
+                  value={action.config.method || 'GET'}
+                  onChange={(e) => handleChange('method', e.target.value)}
+                  className="input-field"
+                >
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="PATCH">PATCH</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white/80">JSON Body</label>
+                <textarea 
+                  value={action.config.body || ''}
+                  onChange={(e) => handleChange('body', e.target.value)}
+                  placeholder={'{\n  "text": "{{variables.message}}"\n}'}
+                  className="input-field min-h-[120px] font-mono text-sm"
+                />
+              </div>
+            </>
+          )}
+
+          {action.actionType === 'CUSTOM_CODE' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white/80">JavaScript Code</label>
+              <p className="text-xs text-white/40 mb-2">Write raw JS. Read from `input` and write to `output`. E.g., `output.total = input.price * 2;`</p>
+              <textarea 
+                value={action.config.code || ''}
+                onChange={(e) => handleChange('code', e.target.value)}
+                placeholder={'// Your custom code here\noutput.result = input.data + " processed";'}
+                className="input-field min-h-[250px] resize-y font-mono text-sm bg-black/60"
+              />
+            </div>
+          )}
+
+          {action.actionType === 'CONDITION' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white/80">Filter Condition (JavaScript)</label>
+              <p className="text-xs text-white/40 mb-2">Write a JS condition. The workflow stops if this evaluates to false. E.g., `variables['0'].http_response.status === 200` or `env.API_KEY !== undefined`</p>
+              <input 
+                type="text"
+                value={action.config.condition || ''}
+                onChange={(e) => handleChange('condition', e.target.value)}
+                placeholder="e.g. variables['0'].status === 200"
+                className="input-field font-mono text-sm bg-black/60"
+              />
+            </div>
+          )}
         </div>
 
         <div className="pt-6 border-t border-surface-border mt-auto">

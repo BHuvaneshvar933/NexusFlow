@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Workspaces from './pages/Workspaces';
 import WorkspaceSettings from './pages/WorkspaceSettings';
 import Executions from './pages/Executions';
+import DataStore from './pages/DataStore';
 import Help from './pages/Help';
 import ProfileSettings from './pages/ProfileSettings';
 import { useAuthStore } from './store/authStore';
@@ -34,6 +35,7 @@ function App() {
           <Route path="workspaces" element={<Workspaces />} />
           <Route path="settings/workspace" element={<WorkspaceSettings />} />
           <Route path="settings/profile" element={<ProfileSettings />} />
+          <Route path="datastore" element={<DataStore />} />
           <Route path="executions" element={<Executions />} />
           <Route path="help" element={<Help />} />
         </Route>

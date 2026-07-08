@@ -5,10 +5,10 @@ export class DatabaseAction implements Action {
   type = 'SAVE_TO_DB';
 
   async execute(payload: any): Promise<ActionResult> {
-    const { table, data } = payload;
+    const { table, data, _workspaceId } = payload;
     
-    if (!table || !data) {
-      return { success: false, error: 'Table and data are required for SAVE_TO_DB' };
+    if (!table || !data || !_workspaceId) {
+      return { success: false, error: 'Table, data, and workspaceId are required for SAVE_TO_DB' };
     }
 
     try {
@@ -19,7 +19,8 @@ export class DatabaseAction implements Action {
       const record = await prisma.dataStore.create({
         data: {
           collection: table,
-          data: parsedData
+          data: parsedData,
+          workspaceId: _workspaceId
         }
       });
 

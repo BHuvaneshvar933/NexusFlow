@@ -32,6 +32,7 @@ export class WorkflowEngine {
           workflowId,
           status: 'running',
           logs: [],
+          triggerData: triggerData,
         },
       });
     }
@@ -69,7 +70,8 @@ export class WorkflowEngine {
 
         const result = await handler.execute({
           ...context,
-          ...interpolatedConfig
+          ...interpolatedConfig,
+          _workspaceId: workflow.workspaceId
         });
         
         if (!result.success) {

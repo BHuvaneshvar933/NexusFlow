@@ -29,6 +29,8 @@ model Workspace {
 
   members   WorkspaceMember[]
   workflows Workflow[]
+  dataStores DataStore[]
+  secrets   Secret[]
 }
 
 model WorkspaceMember {
@@ -85,6 +87,7 @@ model Execution {
   completedAt DateTime?
   logs        Json?     // Array of execution steps
   error       String?
+  triggerData Json?     // The original trigger body, used for replay
   
   workflowId  String
   workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
@@ -95,4 +98,20 @@ model DataStore {
   collection  String   // e.g., "leads", "users"
   data        Json
   createdAt   DateTime @default(now())
+
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Secret {
+  id          String   @id @default(uuid())
+  name        String   // e.g., "STRIPE_KEY"
+  value       String   // Encrypted or plaintext depending on implementation
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
 }

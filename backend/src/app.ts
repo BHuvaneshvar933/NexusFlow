@@ -34,6 +34,7 @@ import authRoutes from './modules/auth/auth.routes';
 import executionRoutes from './modules/executions/execution.routes';
 import webhookRoutes from './modules/webhooks/webhook.routes';
 import workspaceRoutes from './modules/workspaces/workspace.routes';
+import datastoreRoutes from './modules/datastore/datastore.routes';
 import './workers/workflow.worker'; // Initialize the main worker
 import './workers/cron.worker'; // Initialize the cron worker
 
@@ -42,6 +43,7 @@ app.use('/api/workspaces', workspaceRoutes);
 app.use('/api/workflows', workflowRoutes);
 app.use('/api/executions', executionRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/workspaces/:workspaceId/datastore', datastoreRoutes);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {

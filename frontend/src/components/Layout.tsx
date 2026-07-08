@@ -106,6 +106,12 @@ export default function Layout() {
                   Workflows
                 </Link>
                 <Link 
+                  to="/datastore" 
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${location.pathname === '/datastore' ? 'bg-surface text-foreground shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}
+                >
+                  Data Store
+                </Link>
+                <Link 
                   to="/executions" 
                   className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${location.pathname === '/executions' ? 'bg-surface text-foreground shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}
                 >

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Activity, CheckCircle2, XCircle, Clock, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Activity, CheckCircle2, XCircle, Clock, Loader2, ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
 import { getAllExecutionsApi } from '../services/execution';
+import { triggerWorkflowApi } from '../services/workflow';
 
 export default function Executions() {
   const [executions, setExecutions] = useState<any[]>([]);
@@ -11,6 +12,7 @@ export default function Executions() {
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedLogs, setSelectedLogs] = useState<any[] | null>(null);
+  const [isReplaying, setIsReplaying] = useState<string | null>(null);
 
   useEffect(() => {
     setPageInput(page.toString());
@@ -36,6 +38,19 @@ export default function Executions() {
       setError(err.message || 'Failed to load executions');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleReplay = async (execution: any) => {
+    try {
+      setIsReplaying(execution.id);
+      await triggerWorkflowApi(execution.workflowId, execution.triggerData || {});
+      // Refresh the page to show the new execution instantly
+      loadExecutions(page);
+    } catch (err: any) {
+      setError(err.message || 'Failed to replay execution');
+    } finally {
+      setIsReplaying(null);
     }
   };
 
@@ -164,12 +179,24 @@ export default function Executions() {
                             {exec.error}
                           </div>
                         )}
-                        <button 
-                          onClick={() => setSelectedLogs(exec.logs || [])}
-                          className="text-xs text-primary hover:underline self-start font-medium"
-                        >
-                          View Logs
-                        </button>
+                        <div className="flex items-center gap-4 mt-1">
+                          <button 
+                            onClick={() => setSelectedLogs(exec.logs || [])}
+                            className="text-xs text-primary hover:underline font-medium"
+                          >
+                            View Logs
+                          </button>
+                          {exec.status.toLowerCase() === 'failed' && (
+                            <button
+                              onClick={() => handleReplay(exec)}
+                              disabled={isReplaying === exec.id}
+                              className="text-xs text-orange-500 hover:underline font-medium flex items-center gap-1 disabled:opacity-50"
+                            >
+                              <RotateCw className={`w-3 h-3 ${isReplaying === exec.id ? 'animate-spin' : ''}`} />
+                              Replay
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>

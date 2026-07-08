@@ -95,7 +95,7 @@ export default function WorkflowBuilder() {
         target: nodeId,
         type: 'smoothstep',
         animated: true,
-        style: { stroke: '#3b82f6', strokeWidth: 2 }
+        style: { stroke: '#FF4F00', strokeWidth: 2 }
       });
     });
 
@@ -144,21 +144,21 @@ export default function WorkflowBuilder() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#0a0a0a]">
-        <Loader2 className="w-8 h-8 animate-spin text-white/50" />
+      <div className="flex items-center justify-center h-screen bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] overflow-hidden">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       
       {/* Header Overlay */}
       <div className="absolute top-0 left-0 right-0 p-6 z-10 flex items-start justify-between pointer-events-none">
         <div className="flex flex-col gap-2 pointer-events-auto">
           <button 
             onClick={() => navigate('/')}
-            className="text-white/40 hover:text-white transition-colors w-fit text-sm font-medium flex items-center gap-1 bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/10"
+            className="text-foreground/70 hover:text-foreground transition-colors w-fit text-sm font-medium flex items-center gap-1 bg-surface px-3 py-1.5 rounded-full border border-surface-border shadow-sm"
           >
             ← Dashboard
           </button>
@@ -166,19 +166,19 @@ export default function WorkflowBuilder() {
             type="text" 
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="text-3xl font-bold bg-transparent border-none outline-none focus:ring-0 text-white placeholder-white/30 drop-shadow-md"
+            className="text-3xl font-bold bg-transparent border-none outline-none focus:ring-0 text-foreground placeholder-foreground/50 drop-shadow-sm"
             placeholder="Workflow Name"
           />
         </div>
         
-        <div className="flex items-center gap-3 pointer-events-auto bg-black/50 p-2 rounded-xl backdrop-blur-md border border-white/10 shadow-2xl">
+        <div className="flex items-center gap-3 pointer-events-auto bg-surface p-2 rounded-xl border border-surface-border shadow-sm">
           <button 
             onClick={() => setIsPickerOpen(true)}
             className="btn-secondary py-1.5 px-3 text-sm flex items-center gap-2"
           >
             Add Action
           </button>
-          <div className="w-px h-6 bg-white/10 mx-1" />
+          <div className="w-px h-6 bg-surface-border mx-1" />
           <button 
             onClick={() => handleSave(false)} 
             disabled={isSaving}
@@ -190,7 +190,7 @@ export default function WorkflowBuilder() {
           <button 
             onClick={() => handleSave(true)}
             disabled={isSaving}
-            className="btn-primary py-1.5 px-4 text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+            className="btn-primary py-1.5 px-4 text-sm flex items-center gap-2 shadow-[0_4px_14px_0_rgba(255,79,0,0.39)] hover:shadow-[0_6px_20px_rgba(255,79,0,0.23)] hover:bg-[#E64600]"
           >
             <Play className="w-4 h-4" /> Deploy
           </button>
@@ -212,10 +212,10 @@ export default function WorkflowBuilder() {
           minZoom={0.5}
           maxZoom={2}
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-          className="bg-[#050505]"
+          className="bg-background"
         >
-          <Background color="#ffffff" variant={BackgroundVariant.Dots} gap={20} size={1} className="opacity-10" />
-          <Controls className="bg-black/50 border border-white/10 fill-white rounded-lg overflow-hidden backdrop-blur-md" showInteractive={false} />
+          <Background color="#9ca3af" variant={BackgroundVariant.Dots} gap={20} size={1} className="opacity-40" />
+          <Controls className="bg-surface border border-surface-border fill-foreground rounded-lg overflow-hidden shadow-sm" showInteractive={false} />
         </ReactFlow>
       </div>
 

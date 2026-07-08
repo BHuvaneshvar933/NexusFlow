@@ -7,18 +7,17 @@ const updateCronJob = async (workflowId: string, isActive: boolean, cronExpressi
   try {
     const repeatableJobs = await cronQueue.getRepeatableJobs();
     for (const job of repeatableJobs) {
-      if (job.id === workflowId) {
+      if (job.name === workflowId || job.name === 'cron-trigger') {
         await cronQueue.removeRepeatableByKey(job.key);
       }
     }
     
     if (isActive && cronExpression) {
       await cronQueue.add(
-        'cron-trigger',
+        workflowId, // Use workflowId as the unique job name
         { workflowId },
         { 
-          repeat: { pattern: cronExpression },
-          jobId: workflowId
+          repeat: { pattern: cronExpression }
         }
       );
     }
@@ -202,13 +201,23 @@ export const triggerWorkflow = async (req: Request, res: Response) => {
       return sendError(res, 'Workflow is currently inactive', 400);
     }
 
+    // Create execution record synchronously first
+    const execution = await prisma.execution.create({
+      data: {
+        workflowId: workflow.id,
+        status: 'pending',
+        logs: [],
+      },
+    });
+
     // Push execution job to BullMQ
     await workflowQueue.add('execute', {
       workflowId: id,
+      executionId: execution.id,
       triggerData,
     });
 
-    return sendSuccess(res, null, 'Workflow queued for execution', 202);
+    return sendSuccess(res, { executionId: execution.id }, 'Workflow queued for execution', 202);
   } catch (error) {
     return sendError(res, 'Failed to trigger workflow', 500, error);
   }

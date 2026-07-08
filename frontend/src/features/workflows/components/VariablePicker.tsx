@@ -20,8 +20,6 @@ export default function VariablePicker({
 
   const formatVar = (path: string) => {
     if (formatAs === 'js') {
-      // e.g. trigger.body -> trigger.body
-      // e.g. steps.0.http_response -> steps['0'].http_response
       const parts = path.split('.');
       if (parts[0] === 'steps') {
         return `steps['${parts[1]}']${parts.length > 2 ? '.' + parts.slice(2).join('.') : ''}`;
@@ -35,7 +33,7 @@ export default function VariablePicker({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="text-xs flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors mt-1"
+        className="text-xs flex items-center gap-1 text-primary hover:text-primary-hover transition-colors mt-1 font-medium"
         type="button"
       >
         <Braces className="w-3 h-3" />
@@ -47,25 +45,25 @@ export default function VariablePicker({
   const VarButton = ({ path, description }: { path: string, description: string }) => (
     <button 
       type="button" 
-      onClick={() => onSelect(formatVar(path))} 
-      className="block w-full text-left px-2 py-1.5 hover:bg-white/10 rounded transition-colors group mb-1"
+      onClick={() => { onSelect(formatVar(path)); setIsOpen(false); }} 
+      className="block w-full text-left px-2 py-1.5 hover:bg-surface-border rounded transition-colors group"
     >
-      <div className="text-xs text-blue-400 font-mono group-hover:text-blue-300">{formatVar(path)}</div>
-      <div className="text-[10px] text-white/50 mt-0.5 leading-tight">{description}</div>
+      <div className="text-xs text-primary font-mono group-hover:text-primary-hover">{formatVar(path)}</div>
+      <div className="text-[10px] text-muted mt-0.5 leading-tight">{description}</div>
     </button>
   );
 
   return (
-    <div className="mt-2 p-3 bg-black/40 border border-surface-border rounded-lg text-sm">
-      <div className="flex justify-between items-center mb-2 text-white/50 text-xs font-semibold uppercase">
+    <div className="mt-2 p-3 bg-surface border border-surface-border rounded-lg text-sm shadow-sm">
+      <div className="flex justify-between items-center mb-2 text-foreground/50 text-xs font-semibold uppercase">
         Available Variables
-        <button onClick={() => setIsOpen(false)} className="hover:text-white" type="button">Close</button>
+        <button onClick={() => setIsOpen(false)} className="hover:text-foreground" type="button">Close</button>
       </div>
       
       <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
         {/* Trigger Variables */}
         <div>
-          <div className="text-white/80 font-medium mb-1.5 text-xs">Trigger</div>
+          <div className="text-foreground font-medium mb-1.5 text-xs">Trigger</div>
           <VarButton 
             path="trigger.body" 
             description="The JSON payload that triggered this workflow"
@@ -75,7 +73,7 @@ export default function VariablePicker({
         {/* Previous Action Variables */}
         {actions.map(a => (
           <div key={a.id}>
-            <div className="text-white/80 font-medium mb-1.5 text-xs">Step {a.sequence}: {a.actionType.replace(/_/g, ' ')}</div>
+            <div className="text-foreground font-medium mb-1.5 text-xs">Step {a.sequence}: {a.actionType.replace(/_/g, ' ')}</div>
             
             {a.actionType === 'HTTP_REQUEST' && (
               <>

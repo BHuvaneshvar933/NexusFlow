@@ -11,3 +11,13 @@ export const getExecutionByIdApi = async (id: string) => {
     method: 'GET',
   });
 };
+
+export const getAllExecutionsApi = async (page: number = 1, limit: number = 20, status?: string) => {
+  let url = `/executions?page=${page}&limit=${limit}`;
+  if (status && status !== 'ALL') {
+    url += `&status=${status}`;
+  }
+  return apiFetch(url, {
+    method: 'GET',
+  });
+};

@@ -20,7 +20,7 @@ export default function Dashboard() {
   
   const [triggeringId, setTriggeringId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [activeLogsWorkflowId, setActiveLogsWorkflowId] = useState<string | null>(null);
+  const [activeLogsExecutionId, setActiveLogsExecutionId] = useState<string | null>(null);
   const [historyWorkflowId, setHistoryWorkflowId] = useState<string | null>(null);
 
   const [triggerModalId, setTriggerModalId] = useState<string | null>(null);
@@ -38,10 +38,13 @@ export default function Dashboard() {
     }
 
     setTriggeringId(triggerModalId);
-    setActiveLogsWorkflowId(null); 
+    setActiveLogsExecutionId(null); 
     try {
-      await triggerWorkflowApi(triggerModalId, parsedData);
-      setActiveLogsWorkflowId(triggerModalId); 
+      const res = await triggerWorkflowApi(triggerModalId, parsedData);
+      // Ensure we have an executionId
+      if (res.data?.executionId) {
+        setActiveLogsExecutionId(res.data.executionId);
+      }
       setTriggerModalId(null);
     } catch (err: any) {
       alert("Failed to trigger: " + err.message);
@@ -93,14 +96,14 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => setHistoryWorkflowId(workflow.id)}
-                    className="p-1.5 hover:bg-white/10 rounded-md text-white/40 hover:text-white transition-colors"
+                    className="p-1.5 hover:bg-surface-border rounded-md text-foreground/50 hover:text-foreground transition-colors"
                     title="Execution History"
                   >
                     <History className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => navigate(`/workflows/${workflow.id}/edit`)}
-                    className="p-1.5 hover:bg-white/10 rounded-md text-white/40 hover:text-white transition-colors"
+                    className="p-1.5 hover:bg-surface-border rounded-md text-foreground/50 hover:text-foreground transition-colors"
                     title="Edit Workflow"
                   >
                     <Pencil className="w-4 h-4" />
@@ -108,7 +111,7 @@ export default function Dashboard() {
                   <button 
                     onClick={(e) => handleDelete(e, workflow.id)}
                     disabled={deletingId === workflow.id}
-                    className="p-1.5 hover:bg-red-500/20 rounded-md text-white/40 hover:text-red-400 transition-colors"
+                    className="p-1.5 hover:bg-red-500/10 rounded-md text-foreground/50 hover:text-red-500 transition-colors"
                     title="Delete Workflow"
                   >
                     {deletingId === workflow.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -118,16 +121,16 @@ export default function Dashboard() {
               
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-semibold text-white">{workflow.name}</h3>
-                  <div className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${workflow.isActive ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/50'}`}>
+                  <h3 className="text-xl font-semibold text-foreground">{workflow.name}</h3>
+                  <div className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${workflow.isActive ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-surface-border text-foreground/60'}`}>
                     {workflow.isActive ? 'ACTIVE' : 'DRAFT'}
                   </div>
                 </div>
-                <p className="text-sm text-white/60 line-clamp-2">{workflow.description || 'No description provided.'}</p>
+                <p className="text-sm text-muted line-clamp-2">{workflow.description || 'No description provided.'}</p>
               </div>
 
               {workflow.isActive && (
-                <div className="pt-4 border-t border-white/10 mt-auto flex justify-end">
+                <div className="pt-4 border-t border-surface-border mt-auto flex justify-end">
                   <button 
                     onClick={(e) => { 
                       e.preventDefault(); 
@@ -146,18 +149,18 @@ export default function Dashboard() {
           ))}
 
           <Link to="/workflows/new" className="glass-panel p-6 flex flex-col gap-4 border-dashed border-2 hover:border-solid hover:border-primary/50 transition-all cursor-pointer items-center justify-center text-center group">
-            <div className="w-12 h-12 rounded-full bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors flex items-center justify-center text-2xl font-light text-white/50">
+            <div className="w-12 h-12 rounded-full bg-surface-border group-hover:bg-primary/10 group-hover:text-primary transition-colors flex items-center justify-center text-2xl font-light text-foreground/50">
               +
             </div>
-            <span className="font-medium text-white/80 group-hover:text-white">Create New Workflow</span>
+            <span className="font-medium text-foreground/80 group-hover:text-foreground">Create New Workflow</span>
           </Link>
         </div>
       )}
 
-      {activeLogsWorkflowId && (
+      {activeLogsExecutionId && (
         <LiveLogsPanel 
-          workflowId={activeLogsWorkflowId} 
-          onClose={() => setActiveLogsWorkflowId(null)} 
+          executionId={activeLogsExecutionId} 
+          onClose={() => setActiveLogsExecutionId(null)} 
         />
       )}
 
@@ -170,15 +173,15 @@ export default function Dashboard() {
 
       {/* Manual Trigger Modal */}
       {triggerModalId && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="glass-panel w-full max-w-lg p-6 flex flex-col gap-4 animate-slide-up relative border-white/10 shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="glass-panel w-full max-w-lg p-6 flex flex-col gap-4 animate-slide-up relative shadow-2xl">
             <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold text-white">Manual Trigger</h2>
-              <button onClick={() => setTriggerModalId(null)} className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+              <h2 className="text-xl font-bold text-foreground">Manual Trigger</h2>
+              <button onClick={() => setTriggerModalId(null)} className="text-foreground/50 hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white/80">Trigger Payload (JSON)</label>
+              <label className="text-sm font-medium text-foreground/80">Trigger Payload (JSON)</label>
               <textarea 
                 value={triggerPayload}
                 onChange={(e) => setTriggerPayload(e.target.value)}

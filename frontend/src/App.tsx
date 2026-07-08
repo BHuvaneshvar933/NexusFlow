@@ -4,7 +4,11 @@ import Dashboard from './pages/Dashboard';
 import WorkflowBuilder from './features/workflows/WorkflowBuilder';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Workspaces from './pages/Workspaces';
 import WorkspaceSettings from './pages/WorkspaceSettings';
+import Executions from './pages/Executions';
+import Help from './pages/Help';
+import ProfileSettings from './pages/ProfileSettings';
 import { useAuthStore } from './store/authStore';
 
 const ProtectedRoute = () => {
@@ -27,7 +31,11 @@ function App() {
         {/* Standard pages with Navbar */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
+          <Route path="workspaces" element={<Workspaces />} />
           <Route path="settings/workspace" element={<WorkspaceSettings />} />
+          <Route path="settings/profile" element={<ProfileSettings />} />
+          <Route path="executions" element={<Executions />} />
+          <Route path="help" element={<Help />} />
         </Route>
 
         {/* Full-screen Canvas Editor without Navbar */}

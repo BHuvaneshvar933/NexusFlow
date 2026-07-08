@@ -37,19 +37,19 @@ export default function TriggerConfigSidebar({ onClose }: { onClose: () => void 
   return (
     <>
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-fade-in"
+        className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 animate-fade-in"
         onClick={onClose}
       />
       
-      <div className="fixed top-0 right-0 h-full w-[400px] glass-panel border-l border-surface-border bg-[#0a0a0a]/95 z-50 p-6 flex flex-col shadow-2xl animate-slide-up">
+      <div className="fixed top-0 right-0 h-full w-[400px] glass-panel bg-surface border-l border-surface-border z-50 p-6 flex flex-col shadow-2xl animate-slide-up">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-xl font-bold text-white">Configure Trigger</h2>
-            <p className="text-white/50 text-sm mt-1">How should this workflow start?</p>
+            <h2 className="text-xl font-bold text-foreground">Configure Trigger</h2>
+            <p className="text-muted text-sm mt-1">How should this workflow start?</p>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
+            className="p-2 hover:bg-surface-border rounded-full transition-colors text-foreground/50 hover:text-foreground"
           >
             <X className="w-5 h-5" />
           </button>
@@ -57,7 +57,7 @@ export default function TriggerConfigSidebar({ onClose }: { onClose: () => void 
 
         <div className="flex-1 overflow-y-auto space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-white/80">Trigger Type</label>
+            <label className="text-sm font-medium text-foreground/80">Trigger Type</label>
             <select 
               value={triggerType} 
               onChange={(e) => setTriggerType(e.target.value)}
@@ -72,25 +72,25 @@ export default function TriggerConfigSidebar({ onClose }: { onClose: () => void 
           {triggerType === 'WEBHOOK' || triggerType === 'MANUAL' ? (
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white/80">Webhook URL</label>
+                <label className="text-sm font-medium text-foreground/80">Webhook URL</label>
                 {id ? (
-                  <div className="w-full bg-black/40 border border-white/10 rounded-md p-3">
+                  <div className="w-full bg-background border border-surface-border rounded-md p-3">
                     <code className="text-xs text-primary font-mono select-all break-all">
                       {`${window.location.protocol}//${window.location.hostname}:3000/api/webhooks/${id}`}
                     </code>
                   </div>
                 ) : (
-                  <p className="text-xs text-orange-400/80 italic">Save this workflow to generate its unique Webhook URL.</p>
+                  <p className="text-xs text-orange-500 italic">Save this workflow to generate its unique Webhook URL.</p>
                 )}
               </div>
               
               {triggerType === 'WEBHOOK' && (
                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 space-y-2 mt-4">
-                  <h3 className="text-sm font-semibold text-blue-400 flex items-center gap-1.5">
+                  <h3 className="text-sm font-semibold text-blue-500 flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                     How to use Webhooks
                   </h3>
-                  <ul className="text-xs text-blue-100/70 space-y-1.5 list-disc list-inside">
+                  <ul className="text-xs text-blue-400 space-y-1.5 list-disc list-inside">
                     <li>Copy the URL above.</li>
                     <li>Paste it into the webhook settings of any third-party app (Stripe, GitHub, Shopify, etc).</li>
                     <li>When that app sends an HTTP POST request to this URL, your workflow will run automatically.</li>
@@ -100,7 +100,7 @@ export default function TriggerConfigSidebar({ onClose }: { onClose: () => void 
               )}
               
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white/80">Default Test Payload (JSON)</label>
+                <label className="text-sm font-medium text-foreground/80">Default Test Payload (JSON)</label>
                 <textarea
                   value={testPayload || ''}
                   onChange={(e) => setTestPayload(e.target.value)}
@@ -108,13 +108,13 @@ export default function TriggerConfigSidebar({ onClose }: { onClose: () => void 
                   rows={6}
                   className="input-field font-mono text-sm resize-none"
                 />
-                <p className="text-xs text-white/40">This JSON will automatically populate the 'Run Now' modal.</p>
+                <p className="text-xs text-muted">This JSON will automatically populate the 'Run Now' modal.</p>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white/80">Run Every</label>
+                <label className="text-sm font-medium text-foreground/80">Run Every</label>
                 <div className="flex gap-2">
                   <input 
                     type="number" 
@@ -133,8 +133,8 @@ export default function TriggerConfigSidebar({ onClose }: { onClose: () => void 
                     <option value="days">Days</option>
                   </select>
                 </div>
-                <p className="text-xs text-white/40 mt-1">
-                  Generated Cron: <code className="bg-black/40 px-1 rounded font-mono text-white/60">{cronExpression || '0 * * * *'}</code>
+                <p className="text-xs text-muted mt-1">
+                  Generated Cron: <code className="bg-background px-1 py-0.5 rounded font-mono text-foreground border border-surface-border">{cronExpression || '0 * * * *'}</code>
                 </p>
               </div>
             </div>

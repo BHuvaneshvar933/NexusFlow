@@ -2,6 +2,52 @@ import { Request, Response } from 'express'; // Restart nodemon
 import { prisma } from '../../config/database';
 import { sendSuccess, sendError } from '../../utils/response';
 
+export const getAllExecutionsByWorkspace = async (req: Request, res: Response) => {
+  try {
+    const workspaceId = (req as any).workspaceId;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+
+    const statusFilter = req.query.status as string;
+
+    const whereClause: any = {
+      workflow: {
+        workspaceId
+      }
+    };
+
+    if (statusFilter && statusFilter !== 'ALL') {
+      whereClause.status = statusFilter;
+    }
+
+    const [executions, total] = await Promise.all([
+      prisma.execution.findMany({
+        where: whereClause,
+        include: {
+          workflow: true
+        },
+        orderBy: { startedAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.execution.count({ where: whereClause })
+    ]);
+
+    return sendSuccess(res, {
+      executions,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    }, 'Executions retrieved successfully');
+  } catch (error) {
+    return sendError(res, 'Failed to fetch executions', 500, error);
+  }
+};
+
 export const getExecutionsByWorkflow = async (req: Request, res: Response) => {
   try {
     const { workflowId } = req.params;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Activity, ArrowRight, Loader2 } from 'lucide-react';
+import { Activity, Loader2, AlertCircle } from 'lucide-react';
 import { registerApi } from '../services/auth';
 import { useAuthStore } from '../store/authStore';
 
@@ -22,7 +22,7 @@ export default function Register() {
     try {
       const response = await registerApi({ name, email, password });
       setAuth(response.data.user, response.data.token);
-      navigate('/');
+      navigate('/workspaces');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -31,74 +31,82 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass-panel p-8 animate-slide-up">
-        <div className="flex items-center justify-center gap-2 text-primary mb-8">
-          <Activity className="w-8 h-8" />
-          <span className="font-bold text-2xl tracking-tight text-white">NexusFlow</span>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[100px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[100px]" />
+      
+      <div className="w-full max-w-md glass-panel p-8 relative z-10 animate-slide-up shadow-2xl">
+        <div className="flex flex-col items-center gap-2 mb-8 text-center">
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-2 shadow-lg">
+            <Activity className="w-6 h-6 text-primary-foreground" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Create an account</h1>
+          <p className="text-muted">Start automating your workflows today</p>
         </div>
 
-        <h2 className="text-2xl font-semibold text-white mb-2 text-center">Create an account</h2>
-        <p className="text-white/50 text-sm text-center mb-8">Start automating your workflows today</p>
-
         {error && (
-          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center">
-            {error}
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg flex items-start gap-3 animate-fade-in">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p>{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-white/70 mb-1">Full Name</label>
-            <input 
-              type="text" 
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input-field" 
-              placeholder="John Doe"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-            <input 
-              type="email" 
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input-field" 
-              placeholder="you@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-white/70 mb-1">Password</label>
-            <input 
-              type="password" 
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field" 
-              placeholder="••••••••"
-            />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground/80">Full Name</label>
+              <input 
+                type="text" 
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="John Doe"
+                className="input-field"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground/80">Email Address</label>
+              <input 
+                type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="input-field"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground/80">Password</label>
+              <input 
+                type="password" 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="input-field"
+              />
+            </div>
           </div>
           
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full btn-primary flex items-center justify-center gap-2 mt-6"
+            className="w-full btn-primary flex justify-center items-center py-2.5 mt-2"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-              <>Create Account <ArrowRight className="w-4 h-4" /></>
-            )}
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-white/50">
+        <div className="mt-6 text-center text-sm text-muted">
           Already have an account?{' '}
-          <Link to="/login" className="text-primary hover:text-primary-hover transition-colors">
+          <Link 
+            to="/login" 
+            className="text-primary hover:text-primary-hover font-semibold transition-colors"
+          >
             Sign in
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

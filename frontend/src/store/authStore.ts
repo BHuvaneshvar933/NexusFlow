@@ -45,6 +45,13 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'nexusflow-auth-storage', // name of item in localStorage
+      partialize: (state) => ({ 
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        workspaces: state.workspaces,
+        activeWorkspaceId: state.activeWorkspaceId,
+        // Intentionally omitting 'token' so it is not saved to localStorage (XSS protection)
+      }),
     }
   )
 );

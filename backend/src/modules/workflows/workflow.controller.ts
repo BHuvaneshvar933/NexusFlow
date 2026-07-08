@@ -72,7 +72,7 @@ export const getWorkflowById = async (req: Request, res: Response) => {
 
 export const createWorkflow = async (req: Request, res: Response) => {
   try {
-    const { name, description, triggerType, cronExpression, actions, isActive } = req.body;
+    const { name, description, triggerType, cronExpression, testPayload, actions, isActive } = req.body;
     
     const workspaceId = (req as any).workspaceId;
     
@@ -86,6 +86,7 @@ export const createWorkflow = async (req: Request, res: Response) => {
         description,
         triggerType,
         cronExpression,
+        testPayload,
         isActive: isActive || false,
         workspaceId,
         // Nested create for actions
@@ -116,7 +117,7 @@ export const updateWorkflow = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const workspaceId = (req as any).workspaceId;
-    const { name, description, triggerType, cronExpression, isActive, actions } = req.body;
+    const { name, description, triggerType, cronExpression, testPayload, isActive, actions } = req.body;
     
     // Ensure workflow belongs to workspace
     const existing = await prisma.workflow.findFirst({ where: { id: id as string, workspaceId } });
@@ -129,6 +130,7 @@ export const updateWorkflow = async (req: Request, res: Response) => {
         description,
         triggerType,
         cronExpression,
+        testPayload,
         isActive,
         ...(actions && {
           actions: {

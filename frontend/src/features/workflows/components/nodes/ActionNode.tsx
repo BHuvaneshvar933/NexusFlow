@@ -1,5 +1,5 @@
 import { Handle, Position } from '@xyflow/react';
-import { Mail, BrainCircuit, Database, Globe, Code2, Filter, Plus } from 'lucide-react';
+import { Mail, BrainCircuit, Database, Globe, Code2, Filter, Plus, Trash2 } from 'lucide-react';
 
 const ACTION_UI: Record<string, any> = {
   SEND_EMAIL: { icon: <Mail className="w-5 h-5 text-blue-400" />, title: 'Send Email', bg: 'border-blue-500/20 bg-blue-500/5' },
@@ -22,9 +22,16 @@ export default function ActionNode({ data }: { data: any }) {
       />
       
       <div 
-        className={`glass-panel w-64 rounded-xl border shadow-2xl overflow-hidden cursor-pointer hover:border-white/40 transition-colors ${ui.bg}`}
+        className={`glass-panel w-64 rounded-xl border shadow-2xl overflow-hidden cursor-pointer hover:border-white/40 transition-colors relative ${ui.bg}`}
         onClick={data.onClick}
       >
+        <button 
+          onClick={(e) => { e.stopPropagation(); data.onDelete(); }}
+          className="absolute top-3 right-3 p-1.5 rounded-md bg-black/40 text-white/40 hover:text-red-400 hover:bg-red-500/20 transition-colors opacity-0 group-hover:opacity-100"
+          title="Delete action"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
         <div className="p-3 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-black/40">
             {ui.icon}

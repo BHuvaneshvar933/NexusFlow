@@ -13,7 +13,8 @@ export function interpolateString(template: string, context: any): string {
       }
     }
 
-    return value === undefined || value === null ? '' : String(value);
+    if (value === undefined || value === null) return '';
+    return typeof value === 'object' ? JSON.stringify(value) : String(value);
   });
 }
 

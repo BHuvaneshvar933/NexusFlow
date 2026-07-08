@@ -22,7 +22,7 @@ export default function TriggerNode({ data }: { data: any }) {
         </div>
         <div>
           <h3 className="font-bold text-white text-sm">Trigger</h3>
-          <p className="text-xs text-white/50">{data.type.replace(/_/g, ' ')}</p>
+          <p className="text-xs text-white/50">{(data.type || 'UNKNOWN').replace(/_/g, ' ')}</p>
         </div>
       </div>
       <div className="p-3 text-xs text-white/70">

@@ -8,15 +8,19 @@ export interface ActionConfig {
 }
 
 interface WorkflowState {
+  id?: string;
   name: string;
   description: string;
   triggerType: string;
   cronExpression?: string;
+  testPayload?: string;
   actions: ActionConfig[];
+  setId: (id: string) => void;
   setName: (name: string) => void;
   setDescription: (desc: string) => void;
   setTriggerType: (type: string) => void;
   setCronExpression: (expr: string) => void;
+  setTestPayload: (payload: string) => void;
   addAction: (type: string) => void;
   removeAction: (id: string) => void;
   updateActionConfig: (id: string, config: Record<string, any>) => void;
@@ -31,10 +35,12 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   triggerType: 'MANUAL', // Default trigger
   actions: [],
 
+  setId: (id) => set({ id }),
   setName: (name) => set({ name }),
   setDescription: (description) => set({ description }),
   setTriggerType: (triggerType) => set({ triggerType }),
   setCronExpression: (cronExpression) => set({ cronExpression }),
+  setTestPayload: (testPayload) => set({ testPayload }),
 
   addAction: (type) => set((state) => {
     const newAction: ActionConfig = {
@@ -68,18 +74,22 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   }),
 
   loadWorkflow: (workflow) => set({
+    id: workflow.id,
     name: workflow.name,
     description: workflow.description || '',
     triggerType: workflow.triggerType,
     cronExpression: workflow.cronExpression || undefined,
+    testPayload: workflow.testPayload || undefined,
     actions: workflow.actions || [],
   }),
 
   reset: () => set({
+    id: undefined,
     name: 'Untitled Workflow',
     description: '',
     triggerType: 'MANUAL',
     cronExpression: undefined,
+    testPayload: undefined,
     actions: [],
   }),
 }));

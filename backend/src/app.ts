@@ -9,6 +9,8 @@ import { sendError } from './utils/response';
 import { createServer } from 'http';
 import { initializeSocket } from './config/socket';
 
+import cookieParser from 'cookie-parser';
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -18,9 +20,15 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({ 
+  origin: (origin, callback) => {
+    callback(null, true);
+  }, 
+  credentials: true 
+}));
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(cookieParser());
 
 import authRoutes from './modules/auth/auth.routes';
 import executionRoutes from './modules/executions/execution.routes';

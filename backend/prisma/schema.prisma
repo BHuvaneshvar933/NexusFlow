@@ -52,6 +52,7 @@ model Workflow {
   description String?
   triggerType String      // e.g., "MANUAL", "WEBHOOK", "CRON"
   cronExpression String?  // e.g., "0 * * * *"
+  testPayload String?     // Default JSON payload for manual testing
   isActive    Boolean     @default(false)
   
   workspaceId String
@@ -87,4 +88,11 @@ model Execution {
   
   workflowId  String
   workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+}
+
+model DataStore {
+  id          String   @id @default(uuid())
+  collection  String   // e.g., "leads", "users"
+  data        Json
+  createdAt   DateTime @default(now())
 }

@@ -2,24 +2,32 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { sendError } from '../utils/response';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-
 export const protect = (req: Request, res: Response, next: NextFunction) => {
-  let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
-
-  if (!token) {
-    return sendError(res, 'Not authorized to access this route', 401);
-  }
-
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    req.user = decoded;
+    // 1. Try to get token from cookies (Primary)
+    // 2. Fallback to Authorization header (for API clients)
+    let token = req.cookies?.token;
+    
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+      }
+    }
+
+    if (!token) {
+      return sendError(res, 'Authentication required', 401);
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+    (req as any).user = decoded;
+    
+    // Quick hack for this project scope: assume user is part of a default workspace
+    // In a real app, this is determined by URL or headers
+    (req as any).workspaceId = 'default-workspace'; 
+
     next();
   } catch (error) {
-    return sendError(res, 'Not authorized to access this route', 401);
+    return sendError(res, 'Invalid or expired token', 401);
   }
 };

@@ -4,7 +4,7 @@ import { io } from '../../config/socket';
 import { interpolateConfig } from '../../utils/interpolate';
 
 export class WorkflowEngine {
-  async execute(workflowId: string, triggerData: any) {
+  async execute(workflowId: string, triggerData: any, existingExecutionId?: string) {
     console.log(`[WorkflowEngine] Starting execution for workflow: ${workflowId}`);
     
     // 1. Load workflow from DB
@@ -19,14 +19,22 @@ export class WorkflowEngine {
       throw new Error('Workflow not found or inactive');
     }
 
-    // 2. Create execution record
-    const execution = await prisma.execution.create({
-      data: {
-        workflowId,
-        status: 'running',
-        logs: [],
-      },
-    });
+    // 2. Create or update execution record
+    let execution;
+    if (existingExecutionId) {
+      execution = await prisma.execution.update({
+        where: { id: existingExecutionId },
+        data: { status: 'running' }
+      });
+    } else {
+      execution = await prisma.execution.create({
+        data: {
+          workflowId,
+          status: 'running',
+          logs: [],
+        },
+      });
+    }
 
     // Notify listeners that execution has started
     io.to(`workflow-${workflowId}`).emit('execution:started', { executionId: execution.id });

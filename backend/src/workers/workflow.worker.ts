@@ -6,10 +6,10 @@ export const workflowWorker = new Worker(
   'workflow-execution',
   async (job: Job) => {
     console.log(`[Worker] Picked up job ${job.id} for workflow: ${job.data.workflowId}`);
-    const { workflowId, triggerData } = job.data;
+    const { workflowId, triggerData, executionId } = job.data;
     
     // Execute the workflow via the core engine
-    await workflowEngine.execute(workflowId, triggerData);
+    await workflowEngine.execute(workflowId, triggerData, executionId);
   },
   {
     connection: redis as any,

@@ -22,7 +22,7 @@ const nodeTypes = {
 export default function WorkflowBuilder() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { name, description, triggerType, cronExpression, actions, setName, loadWorkflow, reset } = useWorkflowStore();
+  const { name, description, triggerType, cronExpression, actions, setName, loadWorkflow, reset, removeAction } = useWorkflowStore();
   
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -38,8 +38,8 @@ export default function WorkflowBuilder() {
     if (id) {
       setIsLoading(true);
       getWorkflowApi(id)
-        .then((data) => {
-          loadWorkflow(data);
+        .then((response) => {
+          loadWorkflow(response.data);
         })
         .catch((err) => {
           console.error(err);
@@ -82,7 +82,8 @@ export default function WorkflowBuilder() {
           action,
           isLast,
           onClick: () => setSelectedNodeId(nodeId),
-          onAddNext: () => setIsPickerOpen(true)
+          onAddNext: () => setIsPickerOpen(true),
+          onDelete: () => removeAction(action.id)
         }
       });
 
@@ -105,7 +106,7 @@ export default function WorkflowBuilder() {
 
     setNodes(newNodes);
     setEdges(newEdges);
-  }, [actions, triggerType, cronExpression, setNodes, setEdges]);
+  }, [actions, triggerType, cronExpression, setNodes, setEdges, removeAction]);
 
   const handleSave = async (isActive: boolean = false) => {
     if (actions.length === 0) {
@@ -204,6 +205,8 @@ export default function WorkflowBuilder() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
+          nodesConnectable={false}
+          elementsSelectable={true}
           fitView
           fitViewOptions={{ padding: 0.2 }}
           minZoom={0.5}

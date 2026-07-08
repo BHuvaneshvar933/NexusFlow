@@ -1,5 +1,5 @@
 import { Action, ActionResult } from './action.interface';
-import vm from 'vm';
+import { getQuickJS } from 'quickjs-emscripten';
 
 export class CustomCodeAction implements Action {
   type = 'CUSTOM_CODE';
@@ -12,31 +12,57 @@ export class CustomCodeAction implements Action {
         return { success: false, error: 'JavaScript code is required for Custom Code Action' };
       }
       
-      console.log(`[CustomCodeAction] Executing custom script`);
+      console.log(`[CustomCodeAction] Executing custom script securely via QuickJS`);
       
-      // Sandbox context provides isolated global variables
-      const sandbox = {
-        input: payload,
-        output: {},
-        console: {
-          log: (...args: any[]) => console.log('[CustomCode Sandbox]', ...args),
-          error: (...args: any[]) => console.error('[CustomCode Sandbox]', ...args),
+      const QuickJS = await getQuickJS();
+      const vm = QuickJS.newContext();
+      
+      try {
+        // Set the global input variable securely
+        const inputString = JSON.stringify(payload);
+        const inputHandle = vm.newString(inputString);
+        
+        // Use JSON.parse in the VM to parse the string safely
+        const jsonParseCode = `JSON.parse(${JSON.stringify(inputString)})`;
+        const parsedInput = vm.evalCode(jsonParseCode);
+        
+        if (parsedInput.error) {
+           parsedInput.error.dispose();
+           throw new Error("Failed to parse input");
         }
-      };
-      
-      const context = vm.createContext(sandbox);
-      
-      // We wrap the user's code to make it async and allow them to set the output variable or return it.
-      // E.g., user writes: `output.result = input.myVar * 2;`
-      const script = new vm.Script(code);
-      
-      // Execute the script with a timeout to prevent infinite loops
-      script.runInContext(context, { timeout: 1000 });
-      
-      return {
-        success: true,
-        data: sandbox.output
-      };
+        vm.setProp(vm.global, 'input', parsedInput.value);
+        parsedInput.value.dispose();
+        inputHandle.dispose();
+        
+        // Add an empty output object
+        const outputHandle = vm.newObject();
+        vm.setProp(vm.global, 'output', outputHandle);
+
+        // Execute user code
+        const result = vm.evalCode(code);
+        
+        if (result.error) {
+          const errorHandle = result.error;
+          const errorString = vm.dump(errorHandle);
+          errorHandle.dispose();
+          throw new Error(String(errorString));
+        } else {
+          result.value.dispose();
+        }
+
+        // Retrieve output object
+        const finalOutputHandle = vm.getProp(vm.global, 'output');
+        const dumpedOutput = vm.dump(finalOutputHandle);
+        finalOutputHandle.dispose();
+        outputHandle.dispose();
+
+        return {
+          success: true,
+          data: dumpedOutput
+        };
+      } finally {
+        vm.dispose();
+      }
     } catch (error: any) {
       console.error('[CustomCodeAction] Error:', error);
       return { success: false, error: error.message || 'Error executing custom code' };

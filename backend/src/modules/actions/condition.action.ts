@@ -1,15 +1,5 @@
 import { Action, ActionResult } from './action.interface';
-import vm from 'vm';
-
-export interface ConditionActionPayload {
-  config: {
-    condition: string; // e.g. "variables['1'].http_response.status === 200"
-  };
-  context: {
-    variables: Record<string, any>;
-    env: Record<string, string | undefined>;
-  };
-}
+import { getQuickJS } from 'quickjs-emscripten';
 
 export class ConditionAction implements Action<any> {
   type = 'CONDITION';
@@ -22,37 +12,59 @@ export class ConditionAction implements Action<any> {
     }
 
     try {
-      // Create a secure sandbox environment
-      const sandbox = {
-        trigger,
-        steps,
-        console: {
-          log: (...args: any[]) => console.log('[Condition]', ...args),
-          error: (...args: any[]) => console.error('[Condition]', ...args),
-        },
-        result: false,
-      };
+      const QuickJS = await getQuickJS();
+      const vm = QuickJS.newContext();
+      
+      try {
+        // Prepare global trigger object
+        const triggerJson = JSON.stringify(trigger || {});
+        const parsedTrigger = vm.evalCode(`JSON.parse(${JSON.stringify(triggerJson)})`);
+        if (parsedTrigger.error) {
+           parsedTrigger.error.dispose();
+           throw new Error("Failed to parse trigger");
+        }
+        vm.setProp(vm.global, 'trigger', parsedTrigger.value);
+        parsedTrigger.value.dispose();
+        
+        // Prepare global steps object
+        const stepsJson = JSON.stringify(steps || {});
+        const parsedSteps = vm.evalCode(`JSON.parse(${JSON.stringify(stepsJson)})`);
+        if (parsedSteps.error) {
+           parsedSteps.error.dispose();
+           throw new Error("Failed to parse steps");
+        }
+        vm.setProp(vm.global, 'steps', parsedSteps.value);
+        parsedSteps.value.dispose();
 
-      vm.createContext(sandbox);
+        // Execute the condition
+        const script = `!!(${condition})`;
+        const result = vm.evalCode(script);
+        
+        if (result.error) {
+          const errorHandle = result.error;
+          const errorString = vm.dump(errorHandle);
+          errorHandle.dispose();
+          throw new Error(String(errorString));
+        }
 
-      // Execute the condition and assign it to the 'result' variable in the sandbox
-      const script = new vm.Script(`result = !!(${condition});`);
-      script.runInContext(sandbox, { timeout: 1000 }); // 1 second timeout
+        const isMet = vm.dump(result.value);
+        result.value.dispose();
 
-      const isMet = sandbox.result;
-
-      if (isMet) {
-        return { 
-          success: true, 
-          halt: false,
-          data: { met: true, expression: condition }
-        };
-      } else {
-        return { 
-          success: true, 
-          halt: true, 
-          data: { met: false, expression: condition }
-        };
+        if (isMet) {
+          return { 
+            success: true, 
+            halt: false,
+            data: { met: true, expression: condition }
+          };
+        } else {
+          return { 
+            success: true, 
+            halt: true, 
+            data: { met: false, expression: condition }
+          };
+        }
+      } finally {
+        vm.dispose();
       }
     } catch (error: any) {
       console.error('[ConditionAction] Error:', error);

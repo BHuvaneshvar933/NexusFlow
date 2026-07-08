@@ -20,6 +20,7 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
+    credentials: 'include' // crucial for sending HTTP-Only cookies
   });
 
   const data = await response.json();

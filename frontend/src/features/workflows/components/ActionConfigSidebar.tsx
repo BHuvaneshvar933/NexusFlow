@@ -54,7 +54,7 @@ export default function ActionConfigSidebar({
                   placeholder="name@example.com"
                   className="input-field"
                 />
-                <VariablePicker onSelect={(val) => handleChange('to', (action.config.to || '') + val)} />
+                <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('to', (action.config.to || '') + val)} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white/80">Subject</label>
@@ -65,7 +65,7 @@ export default function ActionConfigSidebar({
                   placeholder="Email subject"
                   className="input-field"
                 />
-                <VariablePicker onSelect={(val) => handleChange('subject', (action.config.subject || '') + val)} />
+                <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('subject', (action.config.subject || '') + val)} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white/80">Body</label>
@@ -75,7 +75,7 @@ export default function ActionConfigSidebar({
                   placeholder="Email body..."
                   className="input-field min-h-[120px] resize-y"
                 />
-                <VariablePicker onSelect={(val) => handleChange('body', (action.config.body || '') + val)} />
+                <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('body', (action.config.body || '') + val)} />
               </div>
             </>
           )}
@@ -90,7 +90,7 @@ export default function ActionConfigSidebar({
                 placeholder="Analyze the following data: {{trigger.data}}"
                 className="input-field min-h-[200px] resize-y font-mono text-sm"
               />
-              <VariablePicker onSelect={(val) => handleChange('prompt', (action.config.prompt || '') + val)} />
+              <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('prompt', (action.config.prompt || '') + val)} />
             </div>
           )}
 
@@ -129,7 +129,7 @@ export default function ActionConfigSidebar({
                   placeholder="https://api.example.com/data"
                   className="input-field font-mono text-sm"
                 />
-                <VariablePicker onSelect={(val) => handleChange('url', (action.config.url || '') + val)} />
+                <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('url', (action.config.url || '') + val)} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white/80">Method</label>
@@ -153,7 +153,7 @@ export default function ActionConfigSidebar({
                   placeholder={'{\n  "text": "{{steps.0.message}}"\n}'}
                   className="input-field min-h-[120px] font-mono text-sm"
                 />
-                <VariablePicker onSelect={(val) => handleChange('body', (action.config.body || '') + val)} />
+                <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('body', (action.config.body || '') + val)} />
               </div>
             </>
           )}
@@ -182,7 +182,7 @@ export default function ActionConfigSidebar({
                 placeholder="e.g. steps['0'].status === 200"
                 className="input-field font-mono text-sm bg-black/60"
               />
-              <VariablePicker onSelect={(val) => handleChange('condition', (action.config.condition || '') + val)} />
+              <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('condition', (action.config.condition || '') + val)} formatAs="js" />
             </div>
           )}
         </div>

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import LiveLogsPanel from '../features/executions/LiveLogsPanel';
 import ExecutionHistoryModal from '../features/executions/ExecutionHistoryModal';
+import { X } from 'lucide-react';
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
@@ -22,13 +23,26 @@ export default function Dashboard() {
   const [activeLogsWorkflowId, setActiveLogsWorkflowId] = useState<string | null>(null);
   const [historyWorkflowId, setHistoryWorkflowId] = useState<string | null>(null);
 
-  const handleTrigger = async (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    setTriggeringId(id);
+  const [triggerModalId, setTriggerModalId] = useState<string | null>(null);
+  const [triggerPayload, setTriggerPayload] = useState<string>('{\n  "username": "torvalds"\n}');
+
+  const executeTrigger = async () => {
+    if (!triggerModalId) return;
+    
+    let parsedData = {};
+    try {
+      parsedData = JSON.parse(triggerPayload);
+    } catch (e) {
+      alert("Invalid JSON format");
+      return;
+    }
+
+    setTriggeringId(triggerModalId);
     setActiveLogsWorkflowId(null); 
     try {
-      await triggerWorkflowApi(id, { test: true });
-      setActiveLogsWorkflowId(id); 
+      await triggerWorkflowApi(triggerModalId, parsedData);
+      setActiveLogsWorkflowId(triggerModalId); 
+      setTriggerModalId(null);
     } catch (err: any) {
       alert("Failed to trigger: " + err.message);
     } finally {
@@ -115,7 +129,11 @@ export default function Dashboard() {
               {workflow.isActive && (
                 <div className="pt-4 border-t border-white/10 mt-auto flex justify-end">
                   <button 
-                    onClick={(e) => handleTrigger(e, workflow.id)}
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      setTriggerModalId(workflow.id); 
+                      setTriggerPayload(workflow.testPayload || '{\n  \n}');
+                    }}
                     disabled={triggeringId === workflow.id}
                     className="flex items-center gap-2 px-3 py-1.5 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg text-sm font-medium transition-colors"
                   >
@@ -148,6 +166,35 @@ export default function Dashboard() {
           workflowId={historyWorkflowId}
           onClose={() => setHistoryWorkflowId(null)}
         />
+      )}
+
+      {/* Manual Trigger Modal */}
+      {triggerModalId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="glass-panel w-full max-w-lg p-6 flex flex-col gap-4 animate-slide-up relative border-white/10 shadow-2xl">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-xl font-bold text-white">Manual Trigger</h2>
+              <button onClick={() => setTriggerModalId(null)} className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white/80">Trigger Payload (JSON)</label>
+              <textarea 
+                value={triggerPayload}
+                onChange={(e) => setTriggerPayload(e.target.value)}
+                className="input-field min-h-[150px] font-mono text-sm"
+              />
+            </div>
+            
+            <div className="flex justify-end gap-3 mt-4">
+              <button onClick={() => setTriggerModalId(null)} className="btn-secondary">Cancel</button>
+              <button onClick={executeTrigger} disabled={!!triggeringId} className="btn-primary flex items-center gap-2">
+                {triggeringId ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                Execute Now
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

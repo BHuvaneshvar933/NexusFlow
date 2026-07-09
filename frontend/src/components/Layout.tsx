@@ -82,6 +82,12 @@ export default function Layout() {
 
                       <div className="border-t border-surface-border mt-2 pt-2">
                         <button 
+                          onClick={() => { setIsDropdownOpen(false); navigate('/workspaces'); }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-surface-border transition-colors"
+                        >
+                          <Activity className="w-4 h-4" /> View All Workspaces
+                        </button>
+                        <button 
                           onClick={() => { setIsDropdownOpen(false); navigate('/settings/workspace'); }}
                           className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-surface-border transition-colors"
                         >

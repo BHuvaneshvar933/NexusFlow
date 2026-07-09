@@ -60,7 +60,7 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border border-surface-border rounded-xl shadow-sm;
+    @apply bg-white dark:bg-[#111111] border border-surface-border rounded-xl shadow-xl;
   }
   
   .btn-primary {

@@ -177,9 +177,7 @@ trigger.body.type === "payment_intent.succeeded"`}
       </div>
     )
   },
-      </div>
-    )
-  },
+
   {
     id: 'datastore',
     icon: <Database className="w-5 h-5 text-emerald-500" />,

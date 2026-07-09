@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Plus, LayoutGrid, Users, Loader2, ArrowRight } from 'lucide-react';
+import { Activity, Plus, LayoutGrid, Loader2, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { getWorkspacesApi, createWorkspaceApi } from '../services/workspace';
 

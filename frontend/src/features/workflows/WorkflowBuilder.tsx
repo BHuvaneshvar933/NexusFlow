@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Play, Save, Loader2, Maximize } from 'lucide-react';
+import { Play, Save, Loader2 } from 'lucide-react';
 import { useWorkflowStore } from '../../store/workflowStore';
 import { createWorkflowApi, getWorkflowApi, updateWorkflowApi } from '../../services/workflow';
 
@@ -30,8 +30,8 @@ export default function WorkflowBuilder() {
   
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   // Load workflow data
   useEffect(() => {

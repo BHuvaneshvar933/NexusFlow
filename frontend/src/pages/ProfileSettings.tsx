@@ -6,7 +6,7 @@ export default function ProfileSettings() {
   const user = useAuthStore(s => s.user);
   
   const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
+  const [email] = useState(user?.email || '');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {

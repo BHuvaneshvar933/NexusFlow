@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { Activity, LogOut, ChevronDown, Plus, Users, BookOpen, User as UserIcon } from 'lucide-react';
+import { Activity, LogOut, ChevronDown, Users, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useEffect, useState } from 'react';
 import { getWorkspacesApi } from '../services/workspace';

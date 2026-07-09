@@ -4,7 +4,7 @@ import { X, Loader2, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ExecutionHistoryModal({ workflowId, onClose }: { workflowId: string, onClose: () => void }) {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['executions', workflowId],
     queryFn: () => getExecutionsByWorkflowApi(workflowId)
   });
@@ -89,7 +89,13 @@ export default function ExecutionHistoryModal({ workflowId, onClose }: { workflo
                     {log.data && (
                       <div className="pl-24 pr-4 mt-1">
                         <div className="bg-black/40 border border-white/5 rounded-md p-2 overflow-x-auto text-white/70 whitespace-pre-wrap font-mono text-[11px]">
-                          {JSON.stringify(log.data, null, 2)}
+                          {(() => {
+                            try {
+                              return JSON.stringify(log.data, null, 2);
+                            } catch {
+                              // ignore
+                            }
+                          })()}
                         </div>
                       </div>
                     )}

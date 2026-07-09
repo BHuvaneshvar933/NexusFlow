@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWorkflowStore } from '../../../store/workflowStore';
-import { Braces } from 'lucide-react';
+import { useAuthStore } from '../../../store/authStore';
+import { getSecretsApi } from '../../../services/secret';
+import { Braces, KeyRound } from 'lucide-react';
 
 export default function VariablePicker({ 
   onSelect, 
@@ -12,7 +14,17 @@ export default function VariablePicker({
   currentSequence?: number;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [secrets, setSecrets] = useState<any[]>([]);
+  const activeWorkspaceId = useAuthStore(s => s.activeWorkspaceId);
   let actions = useWorkflowStore(s => s.actions);
+
+  useEffect(() => {
+    if (isOpen && activeWorkspaceId) {
+      getSecretsApi(activeWorkspaceId)
+        .then(res => setSecrets(res.data))
+        .catch(console.error);
+    }
+  }, [isOpen, activeWorkspaceId]);
 
   if (typeof currentSequence === 'number') {
     actions = actions.filter(a => a.sequence < currentSequence);
@@ -69,6 +81,22 @@ export default function VariablePicker({
             description="The JSON payload that triggered this workflow"
           />
         </div>
+
+        {/* Secrets */}
+        {secrets.length > 0 && (
+          <div>
+            <div className="text-foreground font-medium mb-1.5 text-xs flex items-center gap-1 mt-3">
+              <KeyRound className="w-3 h-3 text-orange-500" /> Workspace Secrets
+            </div>
+            {secrets.map(s => (
+              <VarButton 
+                key={s.id}
+                path={`secrets.${s.name}`} 
+                description={s.description || 'Workspace level secret key'}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Previous Action Variables */}
         {actions.map(a => (

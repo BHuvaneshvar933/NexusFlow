@@ -106,7 +106,8 @@ model DataStore {
 model Secret {
   id          String   @id @default(uuid())
   name        String   // e.g., "STRIPE_KEY"
-  value       String   // Encrypted or plaintext depending on implementation
+  description String?  // e.g., "Production stripe key"
+  value       String   // Encrypted value
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

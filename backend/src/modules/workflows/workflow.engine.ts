@@ -2,6 +2,7 @@ import { prisma } from '../../config/database';
 import { ActionFactory } from '../actions/action.factory';
 import { io } from '../../config/socket';
 import { interpolateConfig } from '../../utils/interpolate';
+import { decrypt } from '../../utils/encryption';
 
 export class WorkflowEngine {
   async execute(workflowId: string, triggerData: any, existingExecutionId?: string) {
@@ -41,10 +42,21 @@ export class WorkflowEngine {
     io.to(`workflow-${workflowId}`).emit('execution:started', { executionId: execution.id });
     io.to(execution.id).emit('execution:started', { executionId: execution.id });
 
-    // 3. Execute actions sequentially
+    // 3. Load secrets for the workspace
+    const rawSecrets = await prisma.secret.findMany({
+      where: { workspaceId: workflow.workspaceId }
+    });
+    
+    const secretsMap: Record<string, string> = {};
+    for (const secret of rawSecrets) {
+      secretsMap[secret.name] = decrypt(secret.value);
+    }
+
+    // 4. Execute actions sequentially
     let context: any = { 
       trigger: { ...triggerData },
-      steps: {}
+      steps: {},
+      secrets: secretsMap
     };
     const logs: any[] = [];
 

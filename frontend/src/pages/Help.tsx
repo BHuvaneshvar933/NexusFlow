@@ -177,26 +177,35 @@ trigger.body.type === "payment_intent.succeeded"`}
       </div>
     )
   },
+      </div>
+    )
+  },
   {
-    id: 'debugging',
-    icon: <Activity className="w-5 h-5 text-green-500" />,
-    title: 'Executions & Debugging',
-    description: 'How to monitor and troubleshoot your workflows.',
+    id: 'datastore',
+    icon: <Database className="w-5 h-5 text-emerald-500" />,
+    title: 'Data Store (NoSQL)',
+    description: 'Use the built-in database to capture and manage data.',
     content: (
       <div className="space-y-4">
         <p className="text-foreground/80 leading-relaxed">
-          NexusFlow runs asynchronously using a robust background queuing system. 
+          NexusFlow includes a fully functional <strong>NoSQL database engine</strong> built directly into your workspaces. You do not need to set up external databases like Airtable, MongoDB, or Google Sheets to store your automation data!
         </p>
 
-        <h4 className="font-semibold text-foreground text-lg mt-4">Live Logs</h4>
-        <p className="text-foreground/80 text-sm leading-relaxed">
-          When you click "Run Now", a Live Logs terminal will appear. This connects directly to the background worker via WebSockets and streams the exact execution status, JSON inputs, and outputs of every single step in real-time.
+        <h4 className="font-semibold text-foreground text-lg mt-6">Workflow Operations</h4>
+        <p className="text-foreground/80 leading-relaxed text-sm">
+          Use the <strong>Database Operation</strong> action node in your workflows to perform CRUD (Create, Read, Update, Delete) and Search operations automatically.
         </p>
+        <ul className="list-disc list-inside text-foreground/80 text-sm space-y-1 mt-2 mb-4">
+          <li><strong>Create:</strong> Insert a new JSON document into a collection.</li>
+          <li><strong>Read:</strong> Fetch a document by its ID.</li>
+          <li><strong>Update:</strong> Overwrite an existing document by ID.</li>
+          <li><strong>Delete:</strong> Remove a document by ID.</li>
+          <li><strong>Search:</strong> Perform a JSON exact-match query (e.g. <code>{`{"email": "test@test.com"}`}</code>) to find matching documents.</li>
+        </ul>
 
-        <h4 className="font-semibold text-foreground text-lg mt-4">Execution History</h4>
-        <p className="text-foreground/80 text-sm leading-relaxed">
-          Navigate to the <strong>Executions</strong> tab to view a historical record of every run across your workspace. 
-          You can filter by status (Success, Failed, Pending, Running). Click <strong>View Logs</strong> on any row to open the full JSON trace of that historical run, which is perfect for debugging failed API calls or bad interpolated variables.
+        <h4 className="font-semibold text-foreground text-lg mt-6">Data Store CMS UI</h4>
+        <p className="text-foreground/80 leading-relaxed text-sm">
+          Navigate to the <strong>Data Store</strong> tab to view and manage your database collections via a beautiful graphical interface. You can create collections manually, insert raw JSON documents, edit existing records, and delete rows without writing any code.
         </p>
       </div>
     )

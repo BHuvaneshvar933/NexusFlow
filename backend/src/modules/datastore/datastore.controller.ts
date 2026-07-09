@@ -8,7 +8,7 @@ export class DataStoreController {
     try {
       const workspaceId = req.params.workspaceId as string;
 
-      const collections = await prisma.dataStore.groupBy({
+      const collectionsRaw = await prisma.dataStore.groupBy({
         by: ['collection'],
         where: { workspaceId },
         _count: {
@@ -16,9 +16,22 @@ export class DataStoreController {
         }
       });
 
-      const result = collections.map(c => ({
+      const sentinels = await prisma.dataStore.findMany({
+        where: {
+          workspaceId,
+          data: {
+            path: ['_isSentinel'],
+            equals: true
+          }
+        },
+        select: { collection: true }
+      });
+
+      const sentinelSet = new Set(sentinels.map(s => s.collection));
+
+      const result = collectionsRaw.map(c => ({
         name: c.collection,
-        count: c._count?._all || 0
+        count: (c._count?._all || 0) - (sentinelSet.has(c.collection) ? 1 : 0)
       }));
 
       return sendSuccess(res, result);

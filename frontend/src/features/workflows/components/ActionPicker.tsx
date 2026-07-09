@@ -25,8 +25,8 @@ const AVAILABLE_ACTIONS = [
   },
   {
     type: 'SAVE_TO_DB',
-    title: 'Save to Database',
-    description: 'Insert or update a record in Postgres',
+    title: 'Database Operation',
+    description: 'Perform CRUD operations on DataStore',
     icon: <Database className="w-5 h-5 text-green-500 dark:text-green-400" />,
     bg: 'bg-green-500/10 hover:bg-green-500/20 border-green-500/20'
   },

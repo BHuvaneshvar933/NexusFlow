@@ -97,24 +97,69 @@ export default function ActionConfigSidebar({
           {action.actionType === 'SAVE_TO_DB' && (
             <>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">Table Name</label>
+                <label className="text-sm font-medium text-foreground/80">Operation</label>
+                <select 
+                  value={action.config.operation || 'CREATE'}
+                  onChange={(e) => handleChange('operation', e.target.value)}
+                  className="input-field"
+                >
+                  <option value="CREATE">Create Document</option>
+                  <option value="READ">Read Document</option>
+                  <option value="UPDATE">Update Document</option>
+                  <option value="DELETE">Delete Document</option>
+                  <option value="SEARCH">Search Documents</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground/80">Collection Name</label>
                 <input 
                   type="text" 
                   value={action.config.table || ''}
                   onChange={(e) => handleChange('table', e.target.value)}
-                  placeholder="e.g. users"
+                  placeholder="e.g. leads"
                   className="input-field"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">Data JSON</label>
-                <textarea 
-                  value={action.config.data || ''}
-                  onChange={(e) => handleChange('data', e.target.value)}
-                  placeholder={'{\n  "status": "active"\n}'}
-                  className="input-field min-h-[150px] font-mono text-sm"
-                />
-              </div>
+
+              {['READ', 'UPDATE', 'DELETE'].includes(action.config.operation) && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/80">Document ID</label>
+                  <input 
+                    type="text" 
+                    value={action.config.documentId || ''}
+                    onChange={(e) => handleChange('documentId', e.target.value)}
+                    placeholder="e.g. {{steps.0.id}}"
+                    className="input-field font-mono text-sm"
+                  />
+                  <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('documentId', (action.config.documentId || '') + val)} />
+                </div>
+              )}
+
+              {action.config.operation === 'SEARCH' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/80">Search Query (JSON)</label>
+                  <textarea 
+                    value={action.config.query || ''}
+                    onChange={(e) => handleChange('query', e.target.value)}
+                    placeholder={'{\n  "email": "user@example.com"\n}'}
+                    className="input-field min-h-[120px] font-mono text-sm"
+                  />
+                  <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('query', (action.config.query || '') + val)} />
+                </div>
+              )}
+
+              {['CREATE', 'UPDATE'].includes(action.config.operation || 'CREATE') && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/80">Document Data (JSON)</label>
+                  <textarea 
+                    value={action.config.data || ''}
+                    onChange={(e) => handleChange('data', e.target.value)}
+                    placeholder={'{\n  "status": "active"\n}'}
+                    className="input-field min-h-[120px] font-mono text-sm"
+                  />
+                  <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('data', (action.config.data || '') + val)} />
+                </div>
+              )}
             </>
           )}
 

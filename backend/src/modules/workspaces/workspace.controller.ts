@@ -107,7 +107,7 @@ export class WorkspaceController {
         return sendError(res, 'Only owners or admins can remove members', 403);
       }
 
-      await WorkspaceService.removeMember(workspaceId, userId);
+      await WorkspaceService.removeMember(workspaceId, userId as string);
       sendSuccess(res, null, 'Member removed successfully');
     } catch (error: any) {
       sendError(res, error.message || 'Error removing member', 400);
@@ -125,7 +125,7 @@ export class WorkspaceController {
         return sendError(res, 'Only owners or admins can update member roles', 403);
       }
 
-      const member = await WorkspaceService.updateMemberRole(workspaceId, userId, newRole);
+      const member = await WorkspaceService.updateMemberRole(workspaceId, userId as string, newRole);
       sendSuccess(res, member, 'Member role updated successfully');
     } catch (error: any) {
       sendError(res, error.message || 'Error updating member role', 400);

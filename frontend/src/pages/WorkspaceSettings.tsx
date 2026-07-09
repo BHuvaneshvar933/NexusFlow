@@ -168,15 +168,15 @@ export default function WorkspaceSettings() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-slide-up pb-12">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Workspace Settings</h1>
-        <p className="text-foreground/70 mt-2">Manage workspace preferences, members, and secure credentials.</p>
+    <div className="max-w-6xl mx-auto h-[calc(100vh-4.5rem)] flex flex-col gap-6 animate-slide-up pb-4">
+      <div className="shrink-0 px-2">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Workspace Settings</h1>
+        <p className="text-foreground/70 mt-1 text-sm">Manage workspace preferences, members, and secure credentials.</p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-8 flex-1 min-h-0">
         {/* Sidebar Nav */}
-        <div className="w-full md:w-64 shrink-0 flex flex-col gap-2">
+        <div className="w-full md:w-64 shrink-0 flex flex-col gap-2 overflow-y-auto pb-4 pr-2">
           <button
             onClick={() => setActiveTab('general')}
             className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
@@ -213,7 +213,7 @@ export default function WorkspaceSettings() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 space-y-6 min-h-[500px]">
+        <div className="flex-1 space-y-6 overflow-y-auto pb-12 pr-4">
           
           {/* GENERAL TAB */}
           {activeTab === 'general' && (

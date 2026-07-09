@@ -41,7 +41,7 @@ export class SecretController {
         return sendError(res, 'Only owners or admins can manage secrets', 403);
       }
 
-      const secret = await SecretService.updateSecret(workspaceId, name, value, description);
+      const secret = await SecretService.updateSecret(workspaceId, name as string, value, description);
       sendSuccess(res, secret, 'Secret updated successfully');
     } catch (error: any) {
       sendError(res, error.message || 'Error updating secret', 400);
@@ -58,7 +58,7 @@ export class SecretController {
         return sendError(res, 'Only owners or admins can manage secrets', 403);
       }
 
-      await SecretService.deleteSecret(workspaceId, name);
+      await SecretService.deleteSecret(workspaceId, name as string);
       sendSuccess(res, null, 'Secret deleted successfully');
     } catch (error: any) {
       sendError(res, error.message || 'Error deleting secret', 400);

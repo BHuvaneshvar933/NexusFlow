@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { SecretController } from './secret.controller';
-import { requireAuth } from '../../middleware/auth.middleware';
-import { requireWorkspaceAccess } from '../../middleware/workspace.middleware';
+import { protect } from '../../middleware/auth.middleware';
+import { protectWorkspace } from '../../middleware/workspace.middleware';
 
 const router = Router();
 
 // All secret routes require authentication and workspace access
-router.use(requireAuth);
-router.use('/:workspaceId', requireWorkspaceAccess);
+router.use(protect);
+router.use('/:workspaceId', protectWorkspace);
 
 router.get('/:workspaceId', SecretController.getSecrets);
 router.post('/:workspaceId', SecretController.createSecret);

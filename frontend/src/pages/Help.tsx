@@ -214,21 +214,21 @@ export default function Help() {
   const [activeTab, setActiveTab] = useState(DOCS[0].id);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-slide-up pb-12">
-      <div className="bg-surface border border-surface-border p-8 rounded-2xl shadow-sm relative overflow-hidden">
+    <div className="max-w-6xl mx-auto h-[calc(100vh-4.5rem)] flex flex-col gap-6 animate-slide-up pb-4">
+      <div className="bg-surface border border-surface-border px-6 py-4 rounded-2xl shadow-sm relative overflow-hidden shrink-0">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3 relative z-10">
-          <BookOpen className="w-8 h-8 text-primary" />
+        <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2 relative z-10">
+          <BookOpen className="w-6 h-6 text-primary" />
           Documentation Hub
         </h1>
-        <p className="text-muted mt-2 text-lg relative z-10 max-w-2xl">
+        <p className="text-muted mt-1 text-sm relative z-10 max-w-2xl">
           Everything you need to know to build powerful, scalable automated workflows in NexusFlow.
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-6 flex-1 min-h-0">
         {/* Navigation Sidebar */}
-        <div className="w-full md:w-72 shrink-0 flex flex-col gap-2">
+        <div className="w-full md:w-72 shrink-0 flex flex-col gap-2 overflow-y-auto pb-4 pr-2">
           {DOCS.map(doc => (
             <button
               key={doc.id}
@@ -248,7 +248,7 @@ export default function Help() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 glass-panel p-6 sm:p-10 min-h-[500px]">
+        <div className="flex-1 glass-panel p-6 sm:p-10 overflow-y-auto">
           {DOCS.map(doc => doc.id === activeTab && (
             <div key={doc.id} className="animate-fade-in flex flex-col h-full">
               <div className="flex items-center gap-4 border-b border-surface-border pb-6 mb-8">

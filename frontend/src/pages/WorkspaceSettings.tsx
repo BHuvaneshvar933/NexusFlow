@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useAuthStore } from '../store/authStore';
 import { 
   updateWorkspaceApi, 
@@ -13,7 +13,6 @@ import { getSecretsApi, createSecretApi, deleteSecretApi } from '../services/sec
 import { Users, Settings, KeyRound, Loader2, Trash2, Plus, Copy, Check } from 'lucide-react';
 
 export default function WorkspaceSettings() {
-  const navigate = useNavigate();
   const { workspaces, activeWorkspaceId, setWorkspaces } = useAuthStore();
   const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId);
   const isPrivileged = activeWorkspace?.role === 'owner' || activeWorkspace?.role === 'admin';

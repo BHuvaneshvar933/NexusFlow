@@ -1,4 +1,4 @@
-import { BookOpen, Webhook, Clock, Code2, Users, Zap, Link2, Sparkles, Activity, PlayCircle, Database, Mail, Globe, BrainCircuit } from 'lucide-react';
+import { BookOpen, Webhook, Clock, Code2, Users, Zap, Link2, Sparkles, PlayCircle, Database, Mail, Globe, BrainCircuit } from 'lucide-react';
 import { useState } from 'react';
 
 const DOCS = [

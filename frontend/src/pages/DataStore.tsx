@@ -174,7 +174,7 @@ export default function DataStore() {
                       <td className="p-3 text-right sticky right-0 bg-background group-hover:bg-surface/50 border-l border-surface-border transition-colors">
                         <button
                           onClick={() => handleDelete(doc.id)}
-                          className="text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg opacity-0 md:opacity-0 group-hover:opacity-100 transition-all"
+                          className="text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg opacity-50 hover:opacity-100 transition-all"
                           title="Delete Record"
                         >
                           <Trash2 className="w-4 h-4" />

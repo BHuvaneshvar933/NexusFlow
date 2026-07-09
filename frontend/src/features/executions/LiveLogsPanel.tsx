@@ -24,7 +24,8 @@ export default function LiveLogsPanel({ executionId, onClose }: { executionId: s
 
   useEffect(() => {
     // Initialize Socket Connection
-    const socket = io('http://localhost:3000');
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    const socket = io(BACKEND_URL);
     socketRef.current = socket;
 
     socket.on('connect', () => {

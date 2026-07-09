@@ -1,6 +1,7 @@
 import { useAuthStore } from '../store/authStore';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+const API_BASE_URL = `${BACKEND_URL}/api`;
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const token = useAuthStore.getState().token;

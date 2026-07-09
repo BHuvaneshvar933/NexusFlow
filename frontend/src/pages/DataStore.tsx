@@ -156,7 +156,7 @@ export default function DataStore() {
                         {col}
                       </th>
                     ))}
-                    <th className="p-3 font-semibold text-foreground/70 text-right sticky right-0 bg-surface/50 backdrop-blur-md shadow-[-4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[-4px_0_10px_rgba(0,0,0,0.2)]">Actions</th>
+                    <th className="p-3 font-semibold text-foreground/70 text-right sticky right-0 bg-surface/50 backdrop-blur-md border-l border-surface-border">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-border">
@@ -171,7 +171,7 @@ export default function DataStore() {
                           {typeof doc.data[col] === 'object' ? JSON.stringify(doc.data[col]) : String(doc.data[col] ?? '')}
                         </td>
                       ))}
-                      <td className="p-3 text-right sticky right-0 bg-background group-hover:bg-background/80 shadow-[-4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[-4px_0_10px_rgba(0,0,0,0.2)] transition-colors">
+                      <td className="p-3 text-right sticky right-0 bg-background group-hover:bg-surface/50 border-l border-surface-border transition-colors">
                         <button
                           onClick={() => handleDelete(doc.id)}
                           className="text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg opacity-0 md:opacity-0 group-hover:opacity-100 transition-all"

@@ -124,6 +124,12 @@ export default function Layout() {
                   Executions
                 </Link>
                 <Link 
+                  to="/templates" 
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${location.pathname === '/templates' ? 'bg-surface text-foreground shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}
+                >
+                  Templates
+                </Link>
+                <Link 
                   to="/help" 
                   className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${location.pathname === '/help' ? 'bg-surface text-foreground shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}
                 >

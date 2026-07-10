@@ -222,3 +222,98 @@ export const triggerWorkflow = async (req: Request, res: Response) => {
     return sendError(res, 'Failed to trigger workflow', 500, error);
   }
 };
+
+export const shareWorkflow = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const workspaceId = (req as any).workspaceId;
+    
+    const workflow = await prisma.workflow.findFirst({ where: { id: id as string, workspaceId } });
+    if (!workflow) return sendError(res, 'Workflow not found', 404);
+
+    if (workflow.shareId) {
+      return sendSuccess(res, { shareId: workflow.shareId }, 'Workflow is already shared');
+    }
+
+    const shareId = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 6);
+    const updated = await prisma.workflow.update({
+      where: { id: id as string },
+      data: { isPublic: true, shareId },
+    });
+    return sendSuccess(res, { shareId: updated.shareId }, 'Workflow shared successfully');
+  } catch (error) {
+    return sendError(res, 'Failed to share workflow', 500, error);
+  }
+};
+
+export const getSharedWorkflow = async (req: Request, res: Response) => {
+  try {
+    const { shareId } = req.params;
+    const workflow = await prisma.workflow.findFirst({
+      where: { shareId: shareId as string, OR: [{ isPublic: true }, { isTemplate: true }] },
+      include: {
+        actions: { orderBy: { sequence: 'asc' } },
+        workspace: { select: { id: true, name: true } },
+      },
+    });
+    
+    if (!workflow) return sendError(res, 'Shared workflow not found', 404);
+    return sendSuccess(res, workflow, 'Shared workflow retrieved');
+  } catch (error) {
+    return sendError(res, 'Failed to fetch shared workflow', 500, error);
+  }
+};
+
+export const duplicateWorkflow = async (req: Request, res: Response) => {
+  try {
+    const { shareId } = req.params;
+    const workspaceId = (req as any).workspaceId;
+
+    const sourceWorkflow = await prisma.workflow.findFirst({
+      where: { shareId: shareId as string, OR: [{ isPublic: true }, { isTemplate: true }] },
+      include: { actions: { orderBy: { sequence: 'asc' } } }
+    });
+
+    if (!sourceWorkflow) return sendError(res, 'Shared workflow not found', 404);
+
+    const newWorkflow = await prisma.workflow.create({
+      data: {
+        name: `${sourceWorkflow.name} (Copy)`,
+        description: sourceWorkflow.description,
+        triggerType: sourceWorkflow.triggerType,
+        cronExpression: sourceWorkflow.cronExpression,
+        testPayload: sourceWorkflow.testPayload,
+        isActive: false,
+        workspaceId,
+        actions: {
+          create: sourceWorkflow.actions.map(action => ({
+            actionType: action.actionType,
+            config: action.config || {},
+            sequence: action.sequence
+          }))
+        }
+      },
+      include: { actions: true }
+    });
+
+    return sendSuccess(res, newWorkflow, 'Workflow duplicated successfully', 201);
+  } catch (error) {
+    return sendError(res, 'Failed to duplicate workflow', 500, error);
+  }
+};
+
+export const getTemplates = async (req: Request, res: Response) => {
+  try {
+    const templates = await prisma.workflow.findMany({
+      where: { isTemplate: true },
+      include: {
+        actions: { orderBy: { sequence: 'asc' } },
+        workspace: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    return sendSuccess(res, templates, 'Templates retrieved successfully');
+  } catch (error) {
+    return sendError(res, 'Failed to fetch templates', 500, error);
+  }
+};

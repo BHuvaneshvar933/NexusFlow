@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Workspaces from './pages/Workspaces';
 import WorkspaceSettings from './pages/WorkspaceSettings';
+import Templates from './pages/Templates';
+import SharedWorkflow from './pages/SharedWorkflow';
 import Executions from './pages/Executions';
 import DataStore from './pages/DataStore';
 import Help from './pages/Help';
@@ -28,6 +30,9 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       
+      {/* Public / Read-only Routes */}
+      <Route path="/shared/:shareId" element={<SharedWorkflow />} />
+
       <Route element={<ProtectedRoute />}>
         {/* Standard pages with Navbar */}
         <Route path="/" element={<Layout />}>
@@ -37,6 +42,7 @@ function App() {
           <Route path="settings/profile" element={<ProfileSettings />} />
           <Route path="datastore" element={<DataStore />} />
           <Route path="executions" element={<Executions />} />
+          <Route path="templates" element={<Templates />} />
           <Route path="help" element={<Help />} />
         </Route>
 

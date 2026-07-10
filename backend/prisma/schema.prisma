@@ -56,6 +56,9 @@ model Workflow {
   cronExpression String?  // e.g., "0 * * * *"
   testPayload String?     // Default JSON payload for manual testing
   isActive    Boolean     @default(false)
+  isTemplate  Boolean     @default(false)
+  isPublic    Boolean     @default(false)
+  shareId     String?     @unique
   
   workspaceId String
   workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

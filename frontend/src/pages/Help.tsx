@@ -1,4 +1,4 @@
-import { BookOpen, Webhook, Clock, Code2, Users, Zap, Link2, Sparkles, PlayCircle, Database, Mail, Globe, BrainCircuit } from 'lucide-react';
+import { BookOpen, Webhook, Clock, Code2, Users, Zap, Link2, Sparkles, PlayCircle, Database, Mail, Globe, BrainCircuit, Share2, Copy } from 'lucide-react';
 import { useState } from 'react';
 
 const DOCS = [
@@ -205,6 +205,108 @@ trigger.body.type === "payment_intent.succeeded"`}
         <p className="text-foreground/80 leading-relaxed text-sm">
           Navigate to the <strong>Data Store</strong> tab to view and manage your database collections via a beautiful graphical interface. You can create collections manually, insert raw JSON documents, edit existing records, and delete rows without writing any code.
         </p>
+      </div>
+    )
+  },
+  {
+    id: 'templates',
+    icon: <Share2 className="w-5 h-5 text-indigo-400" />,
+    title: 'Templates & Workflow Sharing',
+    description: 'Learn how to securely share your workflows globally, collaborate across workspaces, and jumpstart your automation projects using the official Template Library.',
+    content: (
+      <div className="space-y-8">
+        {/* Introduction section */}
+        <section>
+          <h3 className="text-xl font-bold text-foreground mb-3">Overview of Sharing in NexusFlow</h3>
+          <p className="text-foreground/80 leading-relaxed">
+            Collaboration is at the heart of NexusFlow. Rather than rebuilding the same automation tasks repeatedly, you can seamlessly share any of your workflows with the world. Sharing generates a highly secure, read-only version of your workflow that anyone can view and instantly duplicate into their own Workspace. Additionally, NexusFlow maintains an ever-growing library of official templates to help you build complex logic in seconds.
+          </p>
+        </section>
+
+        {/* Deep dive into Sharing */}
+        <section>
+          <h3 className="text-xl font-bold text-foreground mb-4 border-b border-surface-border pb-2">Sharing Your Custom Workflows</h3>
+          <p className="text-foreground/80 leading-relaxed mb-4 text-sm">
+            Whether you are sharing an automation solution with a colleague, writing a blog post, or providing technical support, sharing a workflow is a 1-click process. 
+          </p>
+          
+          <div className="bg-surface border border-surface-border p-5 rounded-xl shadow-sm mb-6">
+            <h4 className="font-semibold flex items-center gap-2 mb-3">
+              <span className="flex items-center justify-center bg-primary text-white w-6 h-6 rounded-full text-xs">1</span>
+              How to share a workflow
+            </h4>
+            <ol className="list-decimal list-inside space-y-3 text-sm text-foreground/80 ml-2">
+              <li>Navigate to your desired workflow from the <strong>Dashboard</strong> or <strong>Builder</strong>.</li>
+              <li>Ensure your latest logic is saved by clicking the <strong>Save Draft</strong> button.</li>
+              <li>Click the <strong>Share</strong> button located in the top-right navigation bar of the Builder.</li>
+              <li>A modal will instantly appear containing your secure, public link (e.g., <code>https://your-domain.com/shared/xyz123</code>).</li>
+              <li>Click the <strong>Copy</strong> icon and share it anywhere!</li>
+            </ol>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-background border border-surface-border p-4 rounded-xl">
+              <h5 className="font-semibold text-foreground mb-1 text-sm flex items-center gap-2">
+                <Globe className="w-4 h-4 text-blue-500" /> Read-Only Preview
+              </h5>
+              <p className="text-xs text-foreground/70 leading-relaxed">
+                When a user opens your shared link, they are greeted by a fully interactive, but strictly read-only, canvas. They can inspect your Triggers, view the configuration of your Actions (like HTTP headers or URLs), and understand your workflow architecture without altering your original file.
+              </p>
+            </div>
+            <div className="bg-background border border-surface-border p-4 rounded-xl">
+              <h5 className="font-semibold text-foreground mb-1 text-sm flex items-center gap-2">
+                <Database className="w-4 h-4 text-green-500" /> Privacy & Security First
+              </h5>
+              <p className="text-xs text-foreground/70 leading-relaxed">
+                Your execution logs, live data, and past runs are <strong>never</strong> shared. When someone duplicates your workflow, they receive a clean, blank slate. Your secret environment variables and API keys are not exposed to the public.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Deep dive into Templates */}
+        <section>
+          <h3 className="text-xl font-bold text-foreground mb-4 border-b border-surface-border pb-2">The Official Template Library</h3>
+          <p className="text-foreground/80 leading-relaxed mb-4 text-sm">
+            We understand that starting from a blank canvas can be daunting. The <strong>Template Library</strong> is a curated collection of production-ready workflows built by the NexusFlow team.
+          </p>
+
+          <ul className="space-y-4 text-sm text-foreground/80">
+            <li className="flex gap-3">
+              <div className="shrink-0 mt-0.5"><BookOpen className="w-5 h-5 text-indigo-500" /></div>
+              <div>
+                <strong className="text-foreground block mb-1">Browsing the Library</strong>
+                Access the Template Library by clicking <strong>Templates</strong> in the top navigation bar. You can browse through various categories such as Data Syncing, E-commerce, Notifications, and Webhooks.
+              </div>
+            </li>
+            <li className="flex gap-3">
+              <div className="shrink-0 mt-0.5"><Copy className="w-5 h-5 text-orange-500" /></div>
+              <div>
+                <strong className="text-foreground block mb-1">1-Click Duplication</strong>
+                Found a template you like? Click <strong>Use Template</strong>. NexusFlow will instantly clone the entire node structure, trigger configurations, and custom code directly into your active Workspace. You'll be redirected to the Builder immediately to start tweaking it.
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        {/* Best Practices / Warning */}
+        <section>
+          <div className="bg-primary/5 border border-primary/20 p-5 rounded-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            <h4 className="font-semibold text-primary flex items-center gap-2 text-lg mb-2 relative z-10">
+              <Sparkles className="w-5 h-5" /> Post-Duplication Best Practices
+            </h4>
+            <p className="text-sm text-foreground/80 leading-relaxed relative z-10 mb-4">
+              When you duplicate any workflow (whether from a shared link or the official Template Library), the new workflow is created in an <strong>Inactive</strong> state. To ensure a smooth deployment, always follow this checklist:
+            </p>
+            <ul className="list-disc list-inside text-sm text-foreground/80 space-y-2 relative z-10 ml-2">
+              <li><strong>Verify Connections:</strong> Check your HTTP Request nodes and ensure you have entered your personal API Keys in the Headers.</li>
+              <li><strong>Update Webhook URLs:</strong> If the template relies on a Webhook Trigger, copy your new, unique URL and paste it into the external service (like Stripe or Shopify).</li>
+              <li><strong>Test Run:</strong> Use the "Run Now" feature on the Dashboard to execute a manual test and verify your logic before deploying.</li>
+              <li><strong>Deploy:</strong> Click the <strong>Deploy</strong> button in the Builder to activate your workflow!</li>
+            </ul>
+          </div>
+        </section>
       </div>
     )
   }

@@ -16,25 +16,37 @@ export class ConditionAction implements Action<any> {
       const vm = QuickJS.newContext();
       
       try {
-        // Prepare global trigger object
-        const triggerJson = JSON.stringify(trigger || {});
-        const parsedTrigger = vm.evalCode(`JSON.parse(${JSON.stringify(triggerJson)})`);
-        if (parsedTrigger.error) {
-           parsedTrigger.error.dispose();
-           throw new Error("Failed to parse trigger");
+        const payloadJson = JSON.stringify(payload || {});
+        const parsedPayload = vm.evalCode(`JSON.parse(${JSON.stringify(payloadJson)})`);
+        if (parsedPayload.error) {
+           parsedPayload.error.dispose();
+           throw new Error("Failed to parse payload");
         }
-        vm.setProp(vm.global, 'trigger', parsedTrigger.value);
-        parsedTrigger.value.dispose();
         
-        // Prepare global steps object
-        const stepsJson = JSON.stringify(steps || {});
-        const parsedSteps = vm.evalCode(`JSON.parse(${JSON.stringify(stepsJson)})`);
-        if (parsedSteps.error) {
-           parsedSteps.error.dispose();
-           throw new Error("Failed to parse steps");
+        const payloadHandle = parsedPayload.value;
+        
+        vm.setProp(vm.global, 'env', payloadHandle);
+        
+        const setGlobalIfPresent = (key: string) => {
+          const propHandle = vm.getProp(payloadHandle, key);
+          if (vm.typeof(propHandle) !== 'undefined') {
+             vm.setProp(vm.global, key, propHandle);
+          }
+          propHandle.dispose();
+        };
+
+        setGlobalIfPresent('trigger');
+        setGlobalIfPresent('steps');
+        setGlobalIfPresent('secrets');
+        setGlobalIfPresent('loop');
+        
+        const stepsHandle = vm.getProp(payloadHandle, 'steps');
+        if (vm.typeof(stepsHandle) !== 'undefined') {
+          vm.setProp(vm.global, 'variables', stepsHandle);
         }
-        vm.setProp(vm.global, 'steps', parsedSteps.value);
-        parsedSteps.value.dispose();
+        stepsHandle.dispose();
+        
+        payloadHandle.dispose();
 
         // Execute the condition
         const script = `!!(${condition})`;

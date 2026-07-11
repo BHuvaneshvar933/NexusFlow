@@ -5,6 +5,7 @@ import { DatabaseAction } from './database.action';
 import { HttpAction } from './http.action';
 import { CustomCodeAction } from './code.action';
 import { ConditionAction } from './condition.action';
+import { IteratorAction } from './iterator.action';
 
 export class ActionFactory {
   static create(type: string): Action {
@@ -21,6 +22,8 @@ export class ActionFactory {
         return new CustomCodeAction();
       case 'CONDITION':
         return new ConditionAction();
+      case 'ITERATOR':
+        return new IteratorAction();
       default:
         throw new Error(`Unsupported action type: ${type}`);
     }

@@ -1,4 +1,4 @@
-import { Mail, BrainCircuit, Database, X, Globe, Code2, Filter } from 'lucide-react';
+import { Mail, BrainCircuit, Database, X, Globe, Code2, Filter, Repeat } from 'lucide-react';
 import { useWorkflowStore } from '../../../store/workflowStore';
 
 const AVAILABLE_ACTIONS = [
@@ -8,6 +8,13 @@ const AVAILABLE_ACTIONS = [
     description: 'Halt execution if a condition is not met',
     icon: <Filter className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />,
     bg: 'bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/20'
+  },
+  {
+    type: 'ITERATOR',
+    title: 'Loop / Iterator',
+    description: 'Run subsequent actions for each item in an array',
+    icon: <Repeat className="w-5 h-5 text-pink-600 dark:text-pink-400" />,
+    bg: 'bg-pink-500/10 hover:bg-pink-500/20 border-pink-500/20'
   },
   {
     type: 'SEND_EMAIL',

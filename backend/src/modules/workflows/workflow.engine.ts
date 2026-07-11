@@ -54,89 +54,27 @@ export class WorkflowEngine {
 
     // 4. Execute actions sequentially
     let context: any = { 
-      trigger: { ...triggerData },
+      trigger: { body: triggerData },
       steps: {},
       secrets: secretsMap
     };
     const logs: any[] = [];
 
-    for (const action of workflow.actions) {
-      const stepStart = new Date();
-      const logEntry = { step: action.actionType, status: 'STARTED', timestamp: stepStart };
-      logs.push(logEntry);
-      io.to(execution.id).emit('execution:log', { executionId: execution.id, log: logEntry });
-      io.to(`workflow-${workflowId}`).emit('execution:log', { executionId: execution.id, log: logEntry });
-      
-      try {
-        console.log(`[WorkflowEngine] Executing action: ${action.actionType}`);
-        
-        // Execute action
-        const handler = ActionFactory.create(action.actionType);
-        
-        // Ensure config is treated as an object
-        const config = (action.config && typeof action.config === 'object' && !Array.isArray(action.config) 
-          ? action.config 
-          : {}) as Record<string, any>;
-        
-        const interpolatedConfig = interpolateConfig(config, context);
+    const success = await this.executeSequence(workflow.actions, context, execution.id, workflowId, workflow.workspaceId, logs);
 
-        const result = await handler.execute({
-          ...context,
-          ...interpolatedConfig,
-          _workspaceId: workflow.workspaceId
-        });
-        
-        if (!result.success) {
-          throw new Error(result.error || 'Action failed without specific error');
-        }
-        
-        // Store result in steps namespace
-        context.steps[`${action.sequence}`] = result.data || {};
-        
-        const successLog = { 
-          step: action.actionType, 
-          status: result.halt ? 'FILTERED' : 'SUCCESS', 
-          timestamp: new Date(),
-          durationMs: new Date().getTime() - stepStart.getTime(),
-          data: result.data
-        };
-        logs.push(successLog);
-        io.to(execution.id).emit('execution:log', { executionId: execution.id, log: successLog });
-        io.to(`workflow-${workflowId}`).emit('execution:log', { executionId: execution.id, log: successLog });
-        
-        if (result.halt) {
-          console.log(`[WorkflowEngine] Workflow halted by filter condition.`);
-          break; // Stop executing further actions, but mark execution as successful
-        }
-        
-      } catch (error: any) {
-        console.error(`[WorkflowEngine] Action failed: ${action.actionType}`, error);
-        
-        const errorLog = { 
-          step: action.actionType, 
-          status: 'FAILED', 
-          error: error.message,
-          timestamp: new Date()
-        };
-        logs.push(errorLog);
-        io.to(execution.id).emit('execution:log', { executionId: execution.id, log: errorLog });
-        io.to(`workflow-${workflowId}`).emit('execution:log', { executionId: execution.id, log: errorLog });
-
-        // 4a. Mark execution failed
-        await prisma.execution.update({
-          where: { id: execution.id },
-          data: {
-            status: 'failed',
-            error: error.message,
-            logs: logs as any,
-            completedAt: new Date(),
-          },
-        });
-        
-        io.to(execution.id).emit('execution:failed', { executionId: execution.id, error: error.message });
-        io.to(`workflow-${workflowId}`).emit('execution:failed', { executionId: execution.id });
-        return; // Stop execution on failure
-      }
+    if (!success) {
+      await prisma.execution.update({
+        where: { id: execution.id },
+        data: {
+          status: 'failed',
+          error: 'An action failed during execution',
+          logs: logs as any,
+          completedAt: new Date(),
+        },
+      });
+      io.to(execution.id).emit('execution:failed', { executionId: execution.id, error: 'An action failed' });
+      io.to(`workflow-${workflowId}`).emit('execution:failed', { executionId: execution.id });
+      return;
     }
     
     // 4b. Mark execution complete
@@ -152,6 +90,100 @@ export class WorkflowEngine {
     io.to(execution.id).emit('execution:completed', { executionId: execution.id });
     io.to(`workflow-${workflowId}`).emit('execution:completed', { executionId: execution.id });
     console.log(`[WorkflowEngine] Execution completed successfully: ${execution.id}`);
+  }
+
+  private async executeSequence(
+    actions: any[], 
+    context: any, 
+    executionId: string, 
+    workflowId: string, 
+    workspaceId: string, 
+    logs: any[]
+  ): Promise<boolean> {
+    for (let i = 0; i < actions.length; i++) {
+      const action = actions[i];
+      const stepStart = new Date();
+      // Append loop index if we are inside a loop to make logs clearer
+      const stepLabel = context.loop ? `${action.actionType} (Item ${context.loop.index + 1})` : action.actionType;
+      
+      const logEntry = { step: stepLabel, status: 'STARTED', timestamp: stepStart };
+      logs.push(logEntry);
+      io.to(executionId).emit('execution:log', { executionId, log: logEntry });
+      io.to(`workflow-${workflowId}`).emit('execution:log', { executionId, log: logEntry });
+      
+      try {
+        console.log(`[WorkflowEngine] Executing action: ${action.actionType}`);
+        
+        const handler = ActionFactory.create(action.actionType);
+        
+        const config = (action.config && typeof action.config === 'object' && !Array.isArray(action.config) 
+          ? action.config 
+          : {}) as Record<string, any>;
+        
+        const interpolatedConfig = interpolateConfig(config, context);
+
+        const result = await handler.execute({
+          ...context,
+          ...interpolatedConfig,
+          _workspaceId: workspaceId
+        });
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Action failed without specific error');
+        }
+        
+        // Store result in steps namespace. If in loop, we still overwrite, which might be tricky but typical for iterators
+        context.steps[`${action.sequence}`] = result.data || {};
+        
+        const successLog = { 
+          step: stepLabel, 
+          status: result.halt ? 'FILTERED' : 'SUCCESS', 
+          timestamp: new Date(),
+          durationMs: new Date().getTime() - stepStart.getTime(),
+          data: result.data
+        };
+        logs.push(successLog);
+        io.to(executionId).emit('execution:log', { executionId, log: successLog });
+        io.to(`workflow-${workflowId}`).emit('execution:log', { executionId, log: successLog });
+        
+        if (result.halt) {
+          console.log(`[WorkflowEngine] Workflow halted by filter condition.`);
+          return true; // Halted successfully
+        }
+
+        // Handle ITERATOR splitting
+        if (action.actionType === 'ITERATOR') {
+          const items = result.data?.items || [];
+          const remainingActions = actions.slice(i + 1);
+          
+          for (let j = 0; j < items.length; j++) {
+            // Provide loop item to the context
+            const loopContext = { ...context, loop: { item: items[j], index: j } };
+            const success = await this.executeSequence(remainingActions, loopContext, executionId, workflowId, workspaceId, logs);
+            if (!success) {
+              return false; // Propagate failure up
+            }
+          }
+          break; // Stop current sequence because the rest is handled by the loops
+        }
+        
+      } catch (error: any) {
+        console.error(`[WorkflowEngine] Action failed: ${action.actionType}`, error);
+        
+        const errorLog = { 
+          step: stepLabel, 
+          status: 'FAILED', 
+          error: error.message,
+          timestamp: new Date()
+        };
+        logs.push(errorLog);
+        io.to(executionId).emit('execution:log', { executionId, log: errorLog });
+        io.to(`workflow-${workflowId}`).emit('execution:log', { executionId, log: errorLog });
+
+        return false;
+      }
+    }
+    return true;
   }
 }
 

@@ -18,9 +18,7 @@ export class CustomCodeAction implements Action {
       const vm = QuickJS.newContext();
       
       try {
-        // Set the global input variable securely
         const inputString = JSON.stringify(payload);
-        const inputHandle = vm.newString(inputString);
         
         // Use JSON.parse in the VM to parse the string safely
         const jsonParseCode = `JSON.parse(${JSON.stringify(inputString)})`;
@@ -30,31 +28,66 @@ export class CustomCodeAction implements Action {
            parsedInput.error.dispose();
            throw new Error("Failed to parse input");
         }
-        vm.setProp(vm.global, 'input', parsedInput.value);
-        parsedInput.value.dispose();
-        inputHandle.dispose();
+        
+        const payloadHandle = parsedInput.value;
+        
+        vm.setProp(vm.global, 'input', payloadHandle);
+        vm.setProp(vm.global, 'env', payloadHandle);
+        
+        const setGlobalIfPresent = (key: string) => {
+          const propHandle = vm.getProp(payloadHandle, key);
+          if (vm.typeof(propHandle) !== 'undefined') {
+             vm.setProp(vm.global, key, propHandle);
+          }
+          propHandle.dispose();
+        };
+
+        setGlobalIfPresent('trigger');
+        setGlobalIfPresent('steps');
+        setGlobalIfPresent('secrets');
+        setGlobalIfPresent('loop');
+        
+        // variables is an alias for steps
+        const stepsHandle = vm.getProp(payloadHandle, 'steps');
+        if (vm.typeof(stepsHandle) !== 'undefined') {
+          vm.setProp(vm.global, 'variables', stepsHandle);
+        }
+        stepsHandle.dispose();
+        
+        payloadHandle.dispose();
         
         // Add an empty output object
         const outputHandle = vm.newObject();
         vm.setProp(vm.global, 'output', outputHandle);
 
-        // Execute user code
-        const result = vm.evalCode(code);
-        
-        if (result.error) {
-          const errorHandle = result.error;
-          const errorString = vm.dump(errorHandle);
-          errorHandle.dispose();
-          throw new Error(String(errorString));
-        } else {
-          result.value.dispose();
-        }
+        let errorToThrow = null;
+        let dumpedOutput = null;
 
-        // Retrieve output object
-        const finalOutputHandle = vm.getProp(vm.global, 'output');
-        const dumpedOutput = vm.dump(finalOutputHandle);
-        finalOutputHandle.dispose();
-        outputHandle.dispose();
+        try {
+          // Execute user code
+          const result = vm.evalCode(code);
+          
+          if (result.error) {
+            const errorHandle = result.error;
+            errorToThrow = new Error(String(vm.dump(errorHandle)));
+            errorHandle.dispose();
+          } else {
+            result.value.dispose();
+          }
+
+          // Retrieve output object if no error
+          if (!errorToThrow) {
+            const finalOutputHandle = vm.getProp(vm.global, 'output');
+            dumpedOutput = vm.dump(finalOutputHandle);
+            finalOutputHandle.dispose();
+          }
+        } finally {
+          outputHandle.dispose();
+        }
+        
+        if (errorToThrow) {
+          throw errorToThrow;
+        }
 
         return {
           success: true,

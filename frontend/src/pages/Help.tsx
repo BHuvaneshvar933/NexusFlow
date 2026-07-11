@@ -1,4 +1,4 @@
-import { BookOpen, Webhook, Clock, Code2, Users, Zap, Link2, Sparkles, PlayCircle, Database, Mail, Globe, BrainCircuit, Share2, Copy } from 'lucide-react';
+import { BookOpen, Webhook, Clock, Code2, Users, Zap, Link2, Sparkles, PlayCircle, Database, Mail, Globe, BrainCircuit, Share2, Copy, Repeat } from 'lucide-react';
 import { useState } from 'react';
 
 const DOCS = [
@@ -111,6 +111,11 @@ const DOCS = [
     description: 'Discover the powerful actions you can add to your workflows.',
     content: (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-surface border border-surface-border p-4 rounded-xl">
+          <Repeat className="w-6 h-6 text-pink-500 mb-2" />
+          <h4 className="font-semibold text-foreground">Loop / Iterator</h4>
+          <p className="text-sm text-foreground/70 mt-1">Takes an array of data and repeats all subsequent actions for each item in the array. Access the current item using <code>{`{{loop.item}}`}</code> (max 50 loops).</p>
+        </div>
         <div className="bg-surface border border-surface-border p-4 rounded-xl">
           <Globe className="w-6 h-6 text-blue-500 mb-2" />
           <h4 className="font-semibold text-foreground">HTTP Request</h4>

@@ -1,4 +1,4 @@
-import { Settings2, Trash2, Mail, BrainCircuit, Database, GripVertical } from 'lucide-react';
+import { Settings2, Trash2, Mail, BrainCircuit, Database, GripVertical, Repeat } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useWorkflowStore, type ActionConfig } from '../../../store/workflowStore';
 
@@ -6,12 +6,14 @@ const ActionIcons: Record<string, React.ReactNode> = {
   SEND_EMAIL: <Mail className="w-5 h-5" />,
   AI_ANALYZE: <BrainCircuit className="w-5 h-5" />,
   SAVE_TO_DB: <Database className="w-5 h-5" />,
+  ITERATOR: <Repeat className="w-5 h-5" />,
 };
 
 const ActionColors: Record<string, string> = {
   SEND_EMAIL: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   AI_ANALYZE: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
   SAVE_TO_DB: 'bg-green-500/20 text-green-400 border-green-500/30',
+  ITERATOR: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
 };
 
 interface ActionNodeProps {

@@ -230,6 +230,21 @@ export default function ActionConfigSidebar({
               <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('condition', (action.config.condition || '') + val)} formatAs="js" />
             </div>
           )}
+
+          {action.actionType === 'ITERATOR' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground/80">Array Source</label>
+              <p className="text-xs text-muted mb-2">Select an array to loop over. All actions below this one will execute for each item. Access the current item in subsequent steps using {'{{loop.item}}'} or {'{{loop.item.property}}'}. Limit: 50 items.</p>
+              <input 
+                type="text"
+                value={action.config.arraySource || ''}
+                onChange={(e) => handleChange('arraySource', e.target.value)}
+                placeholder="e.g. {{trigger.body.customers}}"
+                className="input-field font-mono text-sm"
+              />
+              <VariablePicker currentSequence={action.sequence} onSelect={(val) => handleChange('arraySource', (action.config.arraySource || '') + val)} />
+            </div>
+          )}
         </div>
 
         <div className="pt-6 border-t border-surface-border mt-auto">

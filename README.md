@@ -84,7 +84,6 @@ The project is structured into two primary directories:
 
 - **Data Store CMS**: Introduced a fully functional UI and backend module to view and manage data captured by workflows.
 - **Execution Replay**: Added the ability to manually replay failed webhook or manual executions using the original trigger payload.
-- **Documentation Hub**: Overhauled the internal documentation interface to provide comprehensive guides on interpolation, custom code execution, and system architecture.
 
 ## License
 

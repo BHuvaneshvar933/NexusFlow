@@ -26,7 +26,7 @@ export default function TriggerNode({ data }: { data: any }) {
         </div>
       </div>
       <div className="p-3 text-xs text-foreground/80">
-        {data.type === 'WEBHOOK' && <span className="font-mono bg-background text-foreground px-1 py-0.5 rounded truncate block border border-surface-border">/api/webhooks/xxxx</span>}
+        {data.type === 'WEBHOOK' && <span className="font-mono bg-background text-foreground px-1 py-0.5 rounded truncate block border border-surface-border">{import.meta.env.VITE_WEBHOOK_URL || 'http://localhost:3001'}/api/webhooks/xxxx</span>}
         {data.type === 'CRON' && <span className="font-mono bg-background text-foreground px-1 py-0.5 rounded border border-surface-border">{data.cronExpression || 'Not set'}</span>}
         {data.type === 'MANUAL' && <span>Click 'Execute' to run</span>}
       </div>

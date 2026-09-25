@@ -76,7 +76,7 @@ export default function TriggerConfigSidebar({ onClose }: { onClose: () => void 
                 {id ? (
                   <div className="w-full bg-background border border-surface-border rounded-md p-3">
                     <code className="text-xs text-primary font-mono select-all break-all">
-                      {`${window.location.protocol}//${window.location.hostname}:3000/api/webhooks/${id}`}
+                      {`${import.meta.env.VITE_WEBHOOK_URL || `${window.location.protocol}//${window.location.hostname}:3001`}/api/webhooks/${id}`}
                     </code>
                   </div>
                 ) : (

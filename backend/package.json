@@ -5,8 +5,10 @@
   "scripts": {
     "test": "jest",
     "dev": "nodemon src/app.ts",
+    "dev:webhook": "nodemon src/webhook-service.ts",
     "build": "tsc",
     "start": "node dist/app.js",
+    "start:webhook": "node dist/webhook-service.js",
     "start:prod": "npx prisma db push --accept-data-loss && node dist/app.js"
   },
   "keywords": [],
